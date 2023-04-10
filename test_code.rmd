@@ -1,0 +1,61 @@
+---
+title: "Data from Computer Version"
+output: html_document
+date: "2023-04-08"
+---
+```{r}
+library(tidygeocoder)
+library(tidyverse)
+library(broom)
+library(dplyr)
+library(rafalib)
+library(plotly)
+library(geosphere)
+```
+
+```{r}
+l_parramatta_dist <- read.csv("/Users/nasa_william_lu/DATA1901/df_parramatta_houseprice.csv")
+l_merrylands_dist <- read.csv("/Users/nasa_william_lu/DATA1901/df_merrylands_houseprice.csv")
+l_eastwood_dist <- read.csv("/Users/nasa_william_lu/DATA1901/df_eastwood_houseprice.csv")
+l_auburn_dist <- read.csv("/Users/nasa_william_lu/DATA1901/df_auburn_houseprice.csv")
+l_granville_dist <- read.csv("/Users/nasa_william_lu/DATA1901/df_granville_houseprice.csv")
+
+l_parramatta_dist$"distance_to_train_station(km)" <- l_parramatta_dist$distance_to_train_station/1000
+
+l_auburn_dist$"distance_to_train_station(km)" <- l_auburn_dist$distance_to_train_station/1000
+
+l_merrylands_dist$"distance_to_train_station(km)" <- l_merrylands_dist$distance_to_train_station/1000
+
+l_eastwood_dist$"distance_to_train_station(km)" <- l_eastwood_dist$distance_to_train_station/1000
+
+l_granville_dist$"distance_to_train_station(km)" <- l_granville_dist$distance_to_train_station/1000
+
+l_parramatta_dist <- l_parramatta_dist[, -1]
+l_eastwood_dist <- l_eastwood_dist[, -1]
+l_merrylands_dist <-l_merrylands_dist[, -1]
+l_granville_dist <-l_granville_dist[, -1]
+```
+
+```{r}
+ggplot(l_parramatta_dist, aes(x=distance_to_train_station, y=soldprice))+
+  geom_point(aes(color=bedroom))+
+  scale_colour_gradient(low="pink")+
+  labs(title = "Sale Price of Townhouses vs Distance to Train Station", x="Distance to Local Train Station (m)", y="Sale Price ($)")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme_linedraw()
+
+ggplot(l_merrylands_dist, aes(x=distance_to_train_station, y=soldprice))+
+  geom_point(aes(color=bedroom))+
+  scale_colour_gradient(low="blue")+
+  labs(title = "Sale Price of Townhouses vs Distance to Train Station", x="Distance to Local Train Station (m)", y="Sale Price ($)")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme_linedraw()
+
+ggplot(l_auburn_dist, aes(x=distance_to_train_station, y=soldprice))+
+  geom_point(aes(color=bedroom))+
+  scale_colour_gradient(low="red")+
+  labs(title = "Sale Price of Townhouses vs Distance to Train Station", x="Distance to Local Train Station (m)", y="Sale Price ($)")+
+  theme(plot.title = element_text
+
+```
+
