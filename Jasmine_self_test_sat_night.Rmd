@@ -14,17 +14,17 @@ library(geosphere)
 ```
 
 ```{r}
-setwd("~/Uni-Code/4_DATA1901_RStudio/Project2/")
+setwd("..")
 getwd()
 ```
 
 
 ```{r}
-l_parramatta_dist <- read.csv("~/Uni-Code/4_DATA1901_RStudio/Project2/l_files/l_parramatta_houseprice.csv")
-l_merrylands_dist <- read.csv("~/Uni-Code/4_DATA1901_RStudio/Project2/l_files/l_merrylands_houseprice.csv")
-l_eastwood_dist <- read.csv("~/Uni-Code/4_DATA1901_RStudio/Project2/l_files/l_eastwood_houseprice.csv")
-l_auburn_dist <- read.csv("~/Uni-Code/4_DATA1901_RStudio/Project2/l_files/l_auburn_houseprice.csv")
-l_granville_dist <- read.csv("~/Uni-Code/4_DATA1901_RStudio/Project2/l_files/l_granville_houseprice.csv")
+l_parramatta_dist <- read.csv("l_files/l_parramatta_houseprice.csv")
+l_merrylands_dist <- read.csv("l_files/l_merrylands_houseprice.csv")
+l_eastwood_dist <- read.csv("l_files/l_eastwood_houseprice.csv")
+l_auburn_dist <- read.csv("l_files/l_auburn_houseprice.csv")
+l_granville_dist <- read.csv("l_files/l_granville_houseprice.csv")
 
 l_parramatta_dist$"distance_to_train_station(km)" <- l_parramatta_dist$distance_to_train_station/1000
 

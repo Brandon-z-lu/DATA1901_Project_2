@@ -50,7 +50,6 @@ library(dplyr)
 library(lubridate)
 library(tidyverse)
 library(geosphere) # Load geosphere package for `distHaversine`
-library(ggmap) # For `geo_code`
 ```
 
 ![uPic_2023Y-04M-10D_23H-50MIN-25S_yYTx71](https://raw.githubusercontent.com/Brandon-Lu737/Shared_Public_Pic_Hosting/master/uPic_2023Y-04M-10D_23H-50MIN-25S_yYTx71.png)
@@ -80,10 +79,9 @@ house_scraping <- function(location = "2151/Parramatta/"){
   # Loop through each page
   for (thispage in c(1:end_page)){
     
-    print(paste0( "Processing page ", thispage) )
-    # if (thispage %% 5 == 0){
-    #   print(paste0( "Processing page ", thispage) )
-    # }
+    if (thispage %% 5 == 0){
+      print(paste0( "Processing page ", thispage) )
+    }
     
     # get website text
     url <- paste0("https://www.auhouseprices.com/sold/list/NSW/", 
@@ -143,8 +141,6 @@ house_scraping <- function(location = "2151/Parramatta/"){
     
     # Exporting data into a `temp_df`
     # Note that this is preliminary without any location information
-    print(is.character(address))
-    
     temp_df <- data.frame( address = address, 
                            bedroom = as.numeric( unlist( lapply( bedroom, `[`, 1) ) ), 
                            bathroom = as.numeric(  unlist( lapply( bedroom, `[`, 2) ) ),  
@@ -154,8 +150,6 @@ house_scraping <- function(location = "2151/Parramatta/"){
     
     df <- rbind(df, temp_df)
   }
-  print("df complete")
-  print("---")
   
   # Return `df`, ready to be exported as a `csv` file
   return(df)
@@ -166,13 +160,8 @@ https://sydneysuburbreviews.com/inner-west-suburb-rankings/ <-- this site was us
 
 ### Generic function taking a list of suburbs and geolocation data:
 ```{r}
-data_distance_between <- function(lat, lon, fixed_lat, fixed_lon) {
-  dist <- distHaversine(c(lon, lat), c(fixed_lon, fixed_lat))
-  return(dist)
-}  
-
 get_l_suburb <- function(location, suburb_lat, suburb_lon) {
-  df_suburb <- house_scraping(location)
+  df_suburb <- house_scraping("2122/eastwood/")
   l_suburb <- df_suburb %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
   
   l_suburb_dist <- data.frame(
@@ -184,7 +173,7 @@ get_l_suburb <- function(location, suburb_lat, suburb_lon) {
   if (!dir.exists("~/csv_cache")) {
     dir.create("csv_cache")  # create directory if it doesn't exist
   }
-  file_name <- paste0("l_", gsub("/", "_", location), "_houseprice.csv")
+  file_name <- paste0("l_", gsub("/", "", location), "_houseprice.csv")
   print(file_name)
   file_path <- file.path("csv_cache", file_name)  # specify file path
   write.csv(l_suburb_dist, file_path, row.names = FALSE)  # export as CSV file
@@ -193,27 +182,39 @@ get_l_suburb <- function(location, suburb_lat, suburb_lon) {
 get_l_suburb("2122/eastwood/", -33.7899, 151.0821)
 ```
 
+```{r}
+# file_name <- paste0("l_", location, ".csv")
+# # [1] "Processing page 5"
+# # [1] "Processing page 10"
+# # [1] "Processing page 15"
+# # Passing 183 addresses to the ArcGIS single address geocoder
+# # Query completed in: 104.1 seconds
+# # Warning: 'csv_cache' already existsWarning: cannot open file 'csv_cache/l_2122/eastwood/.csv': No such file or directoryError in file(file, ifelse(append, "a", "w")) : 
+# #   cannot open the connection
+```
+
+
 ### Creating data frames `df_parramatta`: SPECIFIC
-```{r, eval=FALSE}
+```{r}
 # TODO: Combining all these different locations into one single function
 # TODO: For the function, input a list of `int[]` and output the corresponding results
 # suburb name with space need to be joined with "+" sign 
-# df_parramatta <- house_scraping(location = "2150/parramatta/")
-# df_merrylands <- house_scraping(location = "2160/merrylands/")
-# df_auburn <- house_scraping(location = "2144/auburn/")
+df_parramatta <- house_scraping(location = "2150/parramatta/")
+df_merrylands <- house_scraping(location = "2160/merrylands/")
+df_auburn <- house_scraping(location = "2144/auburn/")
 df_eastwood <- house_scraping(location = "2122/eastwood/")
-# df_granville <- house_scraping(location = "2142/granville/")
+df_granville <- house_scraping(location = "2142/granville/")
 ```
 
 
 ### A geolocation: `l_parramatta`: SPECIFIC
 ```{r, eval=FALSE}
 print("A geolocation: `l_parramatta`: SPECIFIC")
-# l_parramatta <- df_parramatta %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
-# l_merrylands <- df_merrylands %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
-# l_auburn <- df_auburn %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
+l_parramatta <- df_parramatta %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
+l_merrylands <- df_merrylands %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
+l_auburn <- df_auburn %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
 l_eastwood <- df_eastwood %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
-# l_granville <- df_granville %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
+l_granville <- df_granville %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
 # Error msg: FOR WRITE.CSV
 # Error in file(file, ifelse(append, "a", "w")) :
 # cannot open the connection

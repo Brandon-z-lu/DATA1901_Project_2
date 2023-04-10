@@ -385,14 +385,14 @@ library(plotly)</code></pre>
 ## 
 ##     layout</code></pre>
 <pre class="r"><code>library(geosphere)</code></pre>
-<pre class="r"><code>setwd(&quot;~/Uni-Code/4_DATA1901_RStudio/Project2/&quot;)
+<pre class="r"><code>setwd(&quot;..&quot;)
 getwd()</code></pre>
-<pre><code>## [1] &quot;/Users/nasa_william_lu/Uni-Code/4_DATA1901_RStudio/Project2&quot;</code></pre>
-<pre class="r"><code>l_parramatta_dist &lt;- read.csv(&quot;~/Uni-Code/4_DATA1901_RStudio/Project2/l_files/l_parramatta_houseprice.csv&quot;)
-l_merrylands_dist &lt;- read.csv(&quot;~/Uni-Code/4_DATA1901_RStudio/Project2/l_files/l_merrylands_houseprice.csv&quot;)
-l_eastwood_dist &lt;- read.csv(&quot;~/Uni-Code/4_DATA1901_RStudio/Project2/l_files/l_eastwood_houseprice.csv&quot;)
-l_auburn_dist &lt;- read.csv(&quot;~/Uni-Code/4_DATA1901_RStudio/Project2/l_files/l_auburn_houseprice.csv&quot;)
-l_granville_dist &lt;- read.csv(&quot;~/Uni-Code/4_DATA1901_RStudio/Project2/l_files/l_granville_houseprice.csv&quot;)
+<pre><code>## [1] &quot;/Users/nasa_william_lu/Uni-Code/4_DATA1901_RStudio&quot;</code></pre>
+<pre class="r"><code>l_parramatta_dist &lt;- read.csv(&quot;l_files/l_parramatta_houseprice.csv&quot;)
+l_merrylands_dist &lt;- read.csv(&quot;l_files/l_merrylands_houseprice.csv&quot;)
+l_eastwood_dist &lt;- read.csv(&quot;l_files/l_eastwood_houseprice.csv&quot;)
+l_auburn_dist &lt;- read.csv(&quot;l_files/l_auburn_houseprice.csv&quot;)
+l_granville_dist &lt;- read.csv(&quot;l_files/l_granville_houseprice.csv&quot;)
 
 l_parramatta_dist$&quot;distance_to_train_station(km)&quot; &lt;- l_parramatta_dist$distance_to_train_station/1000
 
