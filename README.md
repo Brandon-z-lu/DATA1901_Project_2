@@ -1,10 +1,10 @@
 # README
 
 ## Apr 12: tomorrow plan
-- [] Complete the `universal` function `get_suburbs_data`
-- [] Increase the scope of research to 10 or even 15 suburbs
-- [] Export all 15 files in the `csv` format
-- [] **Give the `csv` files to Jasmine and Bjungjun for future processing**
+- [ ] Complete the `universal` function `get_suburbs_data`
+- [ ] Increase the scope of research to 10 or even 15 suburbs
+- [ ] Export all 15 files in the `csv` format
+- [ ] **Give the `csv` files to Jasmine and Bjungjun for future processing**
 
 *Ideally, the increased amount of data should make the data seem less random. And we can actually see a trend from it. I'll also be experimenting different methods to try to get a trend.*
 
