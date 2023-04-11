@@ -6,11 +6,9 @@ library(broom)
 library(dplyr)
 library(rafalib)
 library(plotly)
-
-# TODO: Is there a chance where these libraries are loaded twice?
 library(rvest)
 library(lubridate)
-
+library(geosphere)
 setwd("~/DATA1901_Project_2")
 getwd()
 ```
@@ -39,8 +37,10 @@ house_scraping <- function(location = "2151/Parramatta/"){
   
   df <- NULL
   
+  print(paste0( "Current suburb: ", location) )
+  print(paste0( "Total pages ", end_page) )
   for (thispage in c(1:end_page)){
-    
+    # print(paste0( "Processing page ", thispage) )
     if (thispage %% 5 == 0){
       print(paste0( "Processing page ", thispage) )
     }
@@ -119,23 +119,82 @@ house_scraping <- function(location = "2151/Parramatta/"){
 
 ### Before generalization
 ```{r}
-df_eastwood <- house_scraping( location = "2122/eastwood/")
-l_eastwood <- df_eastwood%>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
-
-#####
-library(geosphere)
-distance_between <- function(lat1, lon1, lat2, lon2) {
-  dist <- distHaversine(c(lon1, lat1), c(lon2, lat2))
-  return(dist)
-}
-#####
 data_distance_between <- function(lat, lon, fixed_lat, fixed_lon) {
   dist <- distHaversine(c(lon, lat), c(fixed_lon, fixed_lat))
   return(dist)
+}  
+
+get_l_suburb <- function(location, suburb_lat, suburb_lon) {
+  df_suburb <- house_scraping(location)
+  l_suburb <- df_suburb %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
+  
+  l_suburb_dist <- data.frame(
+    l_suburb, distance_to_train_station = apply(
+      l_suburb[,c("latitude","longitude")], 1, function(x) data_distance_between(x[1], x[2], suburb_lat, suburb_lon))
+  )
+  
+  # Writing the `l_granville_houseprice.csv` file in "~/csv_cache/"
+  if (!dir.exists("~/csv_cache")) {
+    dir.create("csv_cache")  # create directory if it doesn't exist
+  }
+  file_name <- paste0("l_", gsub("/", "_", location), "_houseprice.csv")
+  print(file_name)
+  file_path <- file.path("csv_cache", file_name)  # specify file path
+  write.csv(l_suburb_dist, file_path, row.names = FALSE)  # export as CSV file
+  print("Finish csv export")
 }
-#####
-eastwood_lat <- -33.7899
-eastwood_lon <- 151.0821
-l_eastwood_dist <- data.frame(l_eastwood, distance_to_train_station = apply(l_eastwood[,c("latitude","longitude")], 1, function(x) data_distance_between(x[1], x[2], eastwood_lat, eastwood_lon)))
+get_l_suburb("2122/eastwood/", -33.7899, 151.0821)
+get_l_suburb("2144/auburn/", -33.8490, 151.0329)
+
+```
+
+```
+
+```{r, eval=FALSE}
+<!-- get_l_suburb <- function(location, suburb_lat, suburb_lon) { -->
+<!--   df_suburb <- house_scraping(location) -->
+<!--   l_suburb <- df_suburb %>% mutate(address = as.character(address)) %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude) -->
+
+<!--   l_suburb_dist <- data.frame( -->
+<!--     l_suburb, distance_to_train_station = apply( -->
+<!--       l_suburb[,c("latitude","longitude")], 1, function(x) data_distance_between(x[1], x[2], suburb_lat, suburb_lon)) -->
+<!--   ) -->
+
+<!--   if (!dir.exists("~/csv_cache")) { -->
+<!--     dir.create("csv_cache") -->
+<!--   } -->
+<!--   file_name <- paste0("l_", gsub("/", "_", location), "_houseprice.csv") -->
+<!--   file_path <- file.path("csv_cache", file_name) -->
+<!--   write.csv(l_suburb_dist, file_path, row.names = FALSE) -->
+<!--   return(l_suburb_dist) -->
+<!-- } -->
+
+<!-- get_suburbs_data <- function(suburb_list) { -->
+<!--   all_data <- list() -->
+
+<!--   for (suburb_info in suburb_list) { -->
+<!--     location <- suburb_info[[1]] -->
+<!--     lat <- suburb_info[[2]] -->
+<!--     lon <- suburb_info[[3]] -->
+<!--     suburb_data <- get_l_suburb(location, lat, lon) -->
+<!--     all_data[[location]] <- suburb_data -->
+<!--   } -->
+
+<!--   return(all_data) -->
+<!-- } -->
+
+<!-- suburb_list <- list( -->
+<!--   list("2122/eastwood/", -33.7899, 151.0821), -->
+<!--   list("2144/auburn/", -33.8490, 151.0329) -->
+<!-- ) -->
+
+<!-- suburb_data_list <- get_suburbs_data(suburb_list) -->
+
+<!-- # 1. Print the list -->
+<!-- print(suburb_data_list) -->
+
+<!-- # 2. Append the data (assuming you want to combine all dataframes into one) -->
+<!-- combined_data <- do.call(rbind, lapply(suburb_data_list, function(x) x)) -->
+
 ```
 
