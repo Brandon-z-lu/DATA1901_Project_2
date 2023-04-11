@@ -15,16 +15,6 @@ output:
     code_folding: hide
 ---
 
-# We first load all the libraries.
-```{r, echo=F, message=F}
-library(tidygeocoder)
-library(tidyverse)
-library(broom)
-library(dplyr)
-library(rafalib)
-library(plotly)
-```
-
 <br>
 
 
@@ -37,13 +27,14 @@ library(plotly)
 ## Initial Data Analysis (IDA)
 
 ### Setup
-```{r}
-# Setting the working directory to avoid using absolute path
-setwd("~/Uni-Code/4_DATA1901_RStudio/Project2/")
-getwd()
-```
-
 ```{r, echo=F, message=F}
+library(tidygeocoder)
+library(tidyverse)
+library(broom)
+library(dplyr)
+library(rafalib)
+library(plotly)
+
 # TODO: Is there a chance where these libraries are loaded twice?
 library(rvest)
 library(dplyr)
@@ -51,6 +42,10 @@ library(lubridate)
 library(tidyverse)
 library(geosphere) # Load geosphere package for `distHaversine`
 library(ggmap) # For `geo_code`
+
+# Setting the working directory to avoid using absolute path
+setwd("~/Uni-Code/4_DATA1901_RStudio/Project2/")
+getwd()
 ```
 
 ![uPic_2023Y-04M-10D_23H-50MIN-25S_yYTx71](https://raw.githubusercontent.com/Brandon-Lu737/Shared_Public_Pic_Hosting/master/uPic_2023Y-04M-10D_23H-50MIN-25S_yYTx71.png)
