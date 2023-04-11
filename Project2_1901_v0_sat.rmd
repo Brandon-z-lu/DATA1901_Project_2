@@ -36,7 +36,7 @@ print("Helol")
 
 ## Initial Data Analysis (IDA)
 ```{r}
-setwd("~/Uni-Code/4_DATA1901_RStudio/Project2/")
+setwd("~/DATA1901_Project_2")
 getwd()
 ```
 
