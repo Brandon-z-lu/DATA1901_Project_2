@@ -1,6 +1,34 @@
 # README
 
-## From Apr 11, 2023 **Brandon Lu** (Sorry for the American date format) 
+## From Apr 11, 2023: 'Add `min_work_ex-before_graph.rmd` and successfully run for two suburbs; Add list; De-clutter the code; Reset the `0_sat`'
+- Please look at the `min_work_ex-before_graph.rmd` and the format of `csv_cache/l_2122_eastwood__houseprice.csv`
+- The `min_work_ex-before_graph.rmd` should be able to run on any computer
+    - It currently can process any location and export a `csv` file in `csv_cache/`
+    - Tomorrow, I will add a more general function
+    - 
+```
+# get_suburbs_data <- function(suburb_list) { -->
+#   all_data <- list() -->
+#   for (suburb_info in suburb_list) { -->
+#     location <- suburb_info[[1]] -->
+#     lat <- suburb_info[[2]] -->
+#     lon <- suburb_info[[3]] -->
+#     suburb_data <- get_l_suburb(location, lat, lon) -->
+#     all_data[[location]] <- suburb_data -->
+#   } -->
+#   return(all_data) -->
+# } -->
+# suburb_list <- list( -->
+#   list("2122/eastwood/", -33.7899, 151.0821), -->
+#   list("2144/auburn/", -33.8490, 151.0329) -->
+# ) -->
+# suburb_data_list <- get_suburbs_data(suburb_list) -->
+# # 1. Print the list -->
+# print(suburb_data_list) -->
+# # 2. Append the data (assuming you want to combine all dataframes into one) -->
+# combined_data <- do.call(rbind, lapply(suburb_data_list, function(x) x)) -->
+```
+## From Apr 10, 2023 **Brandon Lu** (Sorry for the American date format) 
 
 ### This contains
 - Code from Jasmine to directly import the csv files
