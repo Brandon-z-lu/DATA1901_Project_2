@@ -162,24 +162,6 @@ df_eastwood <- house_scraping( location = "2122/eastwood/")
 df_granville <- house_scraping( location = "2142/granville/")
 ```
 
-### Exporting data of various suburbs (remove)
-```{r, eval=FALSE}
-# note: the data frames must be in the global environment first for the code to work 
-# general code: write.csv(df_LOCATION, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/df_LOCATION_houseprice.csv", row.names=TRUE) 
-# row.names=TRUE keeps the row names there in the exported csv 
-# https://sydneysuburbreviews.com/inner-west-suburb-rankings/ <-- this site was used to cover all major suburbs 
-
-write.csv(df_parramatta, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Suburb Data/df_parramatta_houseprice.csv", row.names=TRUE)
-
-write.csv(df_merrylands, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Suburb Data/df_merrylands_houseprice.csv", row.names=TRUE) 
-
-write.csv(df_auburn, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Suburb Data/df_auburn_houseprice.csv", row.names=TRUE)
-
-write.csv(df_eastwood, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Suburb Data/df_eastwood_houseprice.csv", row.names=TRUE)
-
-write.csv(df_granville, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Suburb Data/df_granville_houseprice.csv", row.names=TRUE)
-```
-
 ### Exporting data of various suburbs with longitude and latitude (remove exporting, just create new dataframe)
 ```{r}
 l_parramatta <- df_parramatta%>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
@@ -192,7 +174,7 @@ l_auburn <- df_auburn%>% geocode(address, method = 'arcgis', lat=latitude, long=
 write.csv(l_auburn, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Long Lat Suburb Data/l_auburn_houseprice.csv", row.names=TRUE) 
 
 l_eastwood <- df_eastwood%>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
-write.csv(l_eastwood, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Long Lat Suburb Data/l_eastwood_houseprice.csv", row.names=TRUE) 
+# write.csv(l_eastwood, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Long Lat Suburb Data/l_eastwood_houseprice.csv", row.names=TRUE) 
 
 l_granville <- df_granville%>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
 write.csv(l_granville, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Long Lat Suburb Data/l_granville_houseprice.csv", row.names=TRUE) 
