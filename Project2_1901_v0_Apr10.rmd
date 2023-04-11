@@ -15,7 +15,7 @@ output:
     code_folding: hide
 ---
 
-# We first load all the libraries.
+We first load all the libraries.
 ```{r, echo=F, message=F}
 library(tidygeocoder)
 library(tidyverse)
@@ -23,10 +23,10 @@ library(broom)
 library(dplyr)
 library(rafalib)
 library(plotly)
+print("Helol")
 ```
 
 <br>
-
 
 # Executive Summary
 
@@ -35,11 +35,8 @@ library(plotly)
 # Full Report
 
 ## Initial Data Analysis (IDA)
-
-### Setup
 ```{r}
-# Setting the working directory to avoid using absolute path
-setwd("~/DATA1901_Project_2")
+setwd("~/Uni-Code/4_DATA1901_RStudio/Project2/")
 getwd()
 ```
 
@@ -49,41 +46,37 @@ library(rvest)
 library(dplyr)
 library(lubridate)
 library(tidyverse)
-library(geosphere) # Load geosphere package for `distHaversine`
-library(ggmap) # For `geo_code`
 ```
 
-![uPic_2023Y-04M-10D_23H-50MIN-25S_yYTx71](https://raw.githubusercontent.com/Brandon-Lu737/Shared_Public_Pic_Hosting/master/uPic_2023Y-04M-10D_23H-50MIN-25S_yYTx71.png)
-
-### Creating data frames `df_parramatta`: GENERAL
+### Creating Data Frames for a general suburb
 ```{r}
 # HOUSE_SCRAPPING
-
 # adapted from https://embracingtherandom.com/r/web-scraping/rent-scraping/
 house_scraping <- function(location = "2151/Parramatta/"){
-  # Param: String `location`
-  # Output: data_frame `df` ready to be exported as a `.csv` file
+  
   
   # determine how many pages to scroll through 
-  url <- paste0("https://www.auhouseprices.com/sold/list/NSW/", 
+
+   url <- paste0("https://www.auhouseprices.com/sold/list/NSW/", 
                 location, 
                 "1/?type=townhouse&ymin=0&ymax=0&bmin=0&bmax=0&pmin=0&pmax=0&sort=date&kw=") # type set to townhouse, no other filtering
+  
   webpage <- read_html(url)
+  
   # get the number of properties and the number of property displayed on each page 
   find_page_number <- webpage  %>%  html_nodes("h2") %>%  html_text() 
   find_page_number <- find_page_number[1]
   numbers <- as.numeric(regmatches(find_page_number, gregexpr("[0-9]+", find_page_number))[[1]])
   end_page <- ceiling(numbers[3] / numbers[2]) # number of total properties / number on page  = total number of pages
-  # Initialize `df` tu `NULL`
+  
+  
   df <- NULL
   
-  # Loop through each page
   for (thispage in c(1:end_page)){
     
-    print(paste0( "Processing page ", thispage) )
-    # if (thispage %% 5 == 0){
-    #   print(paste0( "Processing page ", thispage) )
-    # }
+    if (thispage %% 5 == 0){
+      print(paste0( "Processing page ", thispage) )
+    }
     
     # get website text
     url <- paste0("https://www.auhouseprices.com/sold/list/NSW/", 
@@ -111,6 +104,7 @@ house_scraping <- function(location = "2151/Parramatta/"){
     price <- trimws(price)
     price <- as.numeric(gsub(",","", price ))
     
+    
     # filter information on sold month and year
     # note sometimes the price is not listed , therefore only get the ones with the price 
     timesold  <- result[ grep("\\$", result)-1]
@@ -134,123 +128,111 @@ house_scraping <- function(location = "2151/Parramatta/"){
     address <- webpage  %>%  html_nodes("h4") %>%  html_text() 
     # end of the relevant content 
     address <-  address[ 1: grep("Auction History", address) -1 ]
-    # TODO: Newly added line to ensure that it's a char vector
-    address <- as.character(address)
     
-    # decide which address contain sold price  
-    sold_info <- grep("Sold on", result) # entry with sold info
-    price_info <- grep("\\$", result) # entry with price info
-    contain_price <- sold_info  %in% c(price_info-1) # for every sold entry, the immediate next row should be price, if not, then this sold entry does not have price record 
-    address <- address[contain_price] # only record those property that has price recorded
     
-    # Exporting data into a `temp_df`
-    # Note that this is preliminary without any location information
-    print(is.character(address))
+    #decide which address contain sold price  
+    sold_info <- grep("Sold on", result) #entry with sold info
+    price_info <- grep("\\$", result) #entry with price info
+    contain_price <- sold_info  %in% c(price_info-1) #for every sold entry, the immediate next row should be price, if not, then this sold entry does not have price record 
+    address <- address[contain_price] #only record those property that has price recorded
     
     temp_df <- data.frame( address = address, 
-                           bedroom = as.numeric( unlist( lapply( bedroom, `[`, 1) ) ), 
-                           bathroom = as.numeric(  unlist( lapply( bedroom, `[`, 2) ) ),  
-                           carspace =  as.numeric( unlist( lapply( bedroom, `[`, 3) ) ), 
-                           soldprice = price,
+                           bedroom = as.numeric( unlist( lapply( bedroom, `[`, 1) ) ) , 
+                           bathroom = as.numeric(  unlist( lapply( bedroom, `[`, 2) )) ,  
+                           carspace =  as.numeric( unlist( lapply( bedroom, `[`, 3) )), 
+                           soldprice = price ,
                            yearsold =timesold )
     
     df <- rbind(df, temp_df)
   }
-  print("df complete")
-  print("---")
   
-  # Return `df`, ready to be exported as a `csv` file
   return(df)
 }
 ```
 
-https://sydneysuburbreviews.com/inner-west-suburb-rankings/ <-- this site was used to cover all major suburbs 
-
-### Generic function taking a list of suburbs and geolocation data:
+### Creating data frames for a list of suburbs
 ```{r}
-df_suburb <- house_scraping("2122/eastwood/")
-data_distance_between <- function(lat, lon, fixed_lat, fixed_lon) {
-  dist <- distHaversine(c(lon, lat), c(fixed_lon, fixed_lat))
-  return(dist)
-}  
-
-get_l_suburb <- function(location, suburb_lat, suburb_lon) {
-  # df_suburb <- house_scraping(location)
-  # TODO: ensure that it's a character vector
-  l_suburb <- df_suburb %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
-  
-  l_suburb_dist <- data.frame(
-    l_suburb, distance_to_train_station = apply(
-      l_suburb[,c("latitude","longitude")], 1, function(x) data_distance_between(x[1], x[2], suburb_lat, suburb_lon))
-  )
-  
-  # Writing the `l_granville_houseprice.csv` file in "~/csv_cache/"
-  if (!dir.exists("~/csv_cache")) {
-    dir.create("csv_cache")  # create directory if it doesn't exist
-  }
-  file_name <- paste0("l_", gsub("/", "_", location), "_houseprice.csv")
-  print(file_name)
-  file_path <- file.path("csv_cache", file_name)  # specify file path
-  write.csv(l_suburb_dist, file_path, row.names = FALSE)  # export as CSV file
-  print("Finished")
-}
-get_l_suburb("2122/eastwood/", -33.7899, 151.0821)
-```
-
-### Creating data frames `df_parramatta`: SPECIFIC
-```{r, eval=FALSE}
 # TODO: Combining all these different locations into one single function
 # TODO: For the function, input a list of `int[]` and output the corresponding results
 # suburb name with space need to be joined with "+" sign 
-# df_parramatta <- house_scraping(location = "2150/parramatta/")
-# df_merrylands <- house_scraping(location = "2160/merrylands/")
-# df_auburn <- house_scraping(location = "2144/auburn/")
-df_eastwood <- house_scraping(location = "2122/eastwood/")
-# df_granville <- house_scraping(location = "2142/granville/")
+df_parramatta <- house_scraping( location = "2150/parramatta/")
+df_merrylands <- house_scraping( location = "2160/merrylands/")
+df_auburn <- house_scraping( location = "2144/auburn/")
+df_eastwood <- house_scraping( location = "2122/eastwood/")
+df_granville <- house_scraping( location = "2142/granville/")
 ```
 
-
-### A geolocation: `l_parramatta`: SPECIFIC
+### Exporting data of various suburbs (remove)
 ```{r, eval=FALSE}
-print("A geolocation: `l_parramatta`: SPECIFIC")
-# l_parramatta <- df_parramatta %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
-# l_merrylands <- df_merrylands %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
-l_auburn <- df_auburn %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
-# l_eastwood <- df_eastwood %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
-# l_granville <- df_granville %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
-# Error msg: FOR WRITE.CSV
-# Error in file(file, ifelse(append, "a", "w")) :
-# cannot open the connection
+# note: the data frames must be in the global environment first for the code to work 
+# general code: write.csv(df_LOCATION, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/df_LOCATION_houseprice.csv", row.names=TRUE) 
+# row.names=TRUE keeps the row names there in the exported csv 
+# https://sydneysuburbreviews.com/inner-west-suburb-rankings/ <-- this site was used to cover all major suburbs 
 
-# [1] "A geolocation: `l_parramatta`: SPECIFIC"
-# Passing 354 addresses to the ArcGIS single address geocoder
-# Query completed in: 183 seconds
-# Passing 407 addresses to the ArcGIS single address geocoder
-# Query completed in: 218.4 seconds
-# Passing 577 addresses to the ArcGIS single address geocoder
-# Query completed in: 311.7 seconds
-# Passing 183 addresses to the ArcGIS single address geocoder
-# Query completed in: 106.5 seconds
-# Passing 280 addresses to the ArcGIS single address geocoder
-# Query completed in: 143.5 seconds
+write.csv(df_parramatta, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Suburb Data/df_parramatta_houseprice.csv", row.names=TRUE)
+
+write.csv(df_merrylands, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Suburb Data/df_merrylands_houseprice.csv", row.names=TRUE) 
+
+write.csv(df_auburn, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Suburb Data/df_auburn_houseprice.csv", row.names=TRUE)
+
+write.csv(df_eastwood, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Suburb Data/df_eastwood_houseprice.csv", row.names=TRUE)
+
+write.csv(df_granville, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Suburb Data/df_granville_houseprice.csv", row.names=TRUE)
 ```
 
+### Exporting data of various suburbs with longitude and latitude (remove exporting, just create new dataframe)
+```{r}
+l_parramatta <- df_parramatta%>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
+write.csv(l_parramatta, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Long Lat Suburb Data/l_parramatta_houseprice.csv", row.names=TRUE)
+
+l_merrylands <- df_merrylands%>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
+write.csv(l_merrylands, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Long Lat Suburb Data/l_merrylands_houseprice.csv", row.names=TRUE) 
+
+l_auburn <- df_auburn%>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
+write.csv(l_auburn, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Long Lat Suburb Data/l_auburn_houseprice.csv", row.names=TRUE) 
+
+l_eastwood <- df_eastwood%>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
+write.csv(l_eastwood, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Long Lat Suburb Data/l_eastwood_houseprice.csv", row.names=TRUE) 
+
+l_granville <- df_granville%>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
+write.csv(l_granville, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Long Lat Suburb Data/l_granville_houseprice.csv", row.names=TRUE) 
+```
+
+### Function to calculate distance between two points using longitude and latitude (remove)
+```{r}
+library(geosphere)
+
+distance_between <- function(lat1, lon1, lat2, lon2) {
+  dist <- distHaversine(c(lon1, lat1), c(lon2, lat2))
+  return(dist)
+}
+
+# function that takes latitude and longitude coordinates for two locations and returns the distance in metres
+
+# distHaversine function from the geosphere package returns the distance between two points on the Earth's surface using the Haversine formula, which takes into account the curvature of the Earth's surface. The result is an approximation and may not be completely accurate, especially over very long distances. 
+
+# The distHaversine function in the geosphere package expects its input to be in the order of longitude and latitude, i.e., distHaversine(c(lon1, lat1), c(lon2, lat2)).
+
+# In the distance_between function, the input parameters are defined as distance_between(lat1, lon1, lat2, lon2). However, when calling distHaversine, the coordinates are passed in as c(lon1, lat1) and c(lon2, lat2), with longitude first followed by latitude. This is simply a matter of preference. 
+
+# FIXME: What does this table of `random data` do?
+table(distance_between(40.7128, -74.0060, 37.7749, -122.4194))
+# takes the longitudes and latitudes as specified in the form above to calculate the distance
+```
 
 ### Function to calculate distance between two points using longitude and latitude from dataframe
 ```{r}
-# function that returns the distance between places within the dataframe using longitude and latitude column, and a fixed location. Now, we just need to substitute fixed_lat and fixed_lon with the desired locations for train stations etc to incorporate into the data
 data_distance_between <- function(lat, lon, fixed_lat, fixed_lon) {
   dist <- distHaversine(c(lon, lat), c(fixed_lon, fixed_lat))
   return(dist)
-}  
+}  # function that returns the distance between places within the dataframe using longitude and latitude column, and a fixed location. Now, we just need to substitute fixed_lat and fixed_lon with the desired locations for train stations etc to incorporate into the data
 
-# used Google maps for all longitudes and latitudes
+# used google maps for all longitudes and latitudes
 
-# 1. Input the Google map data into the `data_distance_between()`
-# 2. expport the distance and the `l_paramatta` into a new `l_paramatta_dist`
 parramatta_lat <- -33.8175
 parramatta_lon <- 151.0050
 l_parramatta_dist <- data.frame(l_parramatta, distance_to_train_station = apply(l_parramatta[,c("latitude","longitude")], 1, function(x) data_distance_between(x[1], x[2], parramatta_lat, parramatta_lon)))
+
 
 merrylands_lat <- -33.8363
 merrylands_lon <- 150.9926
@@ -274,15 +256,6 @@ l_granville_dist <- data.frame(l_granville, distance_to_train_station = apply(l_
 
 # x is a row in the dataframe. x[1] is first element of x which is longitude
 ```
-
-### Exporting into `csv` file
-```{r}
-# Writing the `l_granville_houseprice.csv` file in "~/csv_cache/"
-dir.create("csv_cache")  # create directory if it doesn't exist
-file_path <- file.path("csv_cache", "l_granville_houseprice.csv")  # specify file path
-write.csv(l_granville_dist, file_path, row.names = FALSE)  # export as CSV file
-```
-
 
 ### Graphing 
 ```{r}
@@ -343,3 +316,10 @@ When did you team meet (date and time), and what did each team member contribute
 <br>
 
 ## Appendix (Optional)
+
+
+
+
+
+
+
