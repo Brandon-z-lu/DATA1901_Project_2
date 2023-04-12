@@ -103,7 +103,8 @@ house_scraping <- function(location = "2151/Parramatta/"){
     contain_price <- sold_info  %in% c(price_info-1) #for every sold entry, the immediate next row should be price, if not, then this sold entry does not have price record 
     address <- address[contain_price] #only record those property that has price recorded
     
-    temp_df <- data.frame( address = address, 
+    temp_df <- data.frame( = thispage
+                           address = address, 
                            bedroom = as.numeric( unlist( lapply( bedroom, `[`, 1) ) ) , 
                            bathroom = as.numeric(  unlist( lapply( bedroom, `[`, 2) )) ,  
                            carspace =  as.numeric( unlist( lapply( bedroom, `[`, 3) )), 
@@ -137,7 +138,7 @@ get_l_suburb <- function(location, suburb_lat, suburb_lon) {
   if (!dir.exists("~/csv_cache")) {
     dir.create("csv_cache")  # create directory if it doesn't exist
   }
-  file_name <- paste0("l_", gsub("/", "_", location), "_houseprice.csv")
+  file_name <- paste0("l_", gsub("/", "_", location), "houseprice.csv")
   print(file_name)
   file_path <- file.path("csv_cache", file_name)  # specify file path
   write.csv(l_suburb_dist, file_path, row.names = FALSE)  # export as CSV file
@@ -148,53 +149,27 @@ get_l_suburb("2144/auburn/", -33.8490, 151.0329)
 
 ```
 
-```
-
+### More general version
 ```{r, eval=FALSE}
-<!-- get_l_suburb <- function(location, suburb_lat, suburb_lon) { -->
-<!--   df_suburb <- house_scraping(location) -->
-<!--   l_suburb <- df_suburb %>% mutate(address = as.character(address)) %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude) -->
-
-<!--   l_suburb_dist <- data.frame( -->
-<!--     l_suburb, distance_to_train_station = apply( -->
-<!--       l_suburb[,c("latitude","longitude")], 1, function(x) data_distance_between(x[1], x[2], suburb_lat, suburb_lon)) -->
-<!--   ) -->
-
-<!--   if (!dir.exists("~/csv_cache")) { -->
-<!--     dir.create("csv_cache") -->
-<!--   } -->
-<!--   file_name <- paste0("l_", gsub("/", "_", location), "_houseprice.csv") -->
-<!--   file_path <- file.path("csv_cache", file_name) -->
-<!--   write.csv(l_suburb_dist, file_path, row.names = FALSE) -->
-<!--   return(l_suburb_dist) -->
-<!-- } -->
-
-<!-- get_suburbs_data <- function(suburb_list) { -->
-<!--   all_data <- list() -->
-
-<!--   for (suburb_info in suburb_list) { -->
-<!--     location <- suburb_info[[1]] -->
-<!--     lat <- suburb_info[[2]] -->
-<!--     lon <- suburb_info[[3]] -->
-<!--     suburb_data <- get_l_suburb(location, lat, lon) -->
-<!--     all_data[[location]] <- suburb_data -->
-<!--   } -->
-
-<!--   return(all_data) -->
-<!-- } -->
-
-<!-- suburb_list <- list( -->
-<!--   list("2122/eastwood/", -33.7899, 151.0821), -->
-<!--   list("2144/auburn/", -33.8490, 151.0329) -->
-<!-- ) -->
-
-<!-- suburb_data_list <- get_suburbs_data(suburb_list) -->
-
-<!-- # 1. Print the list -->
-<!-- print(suburb_data_list) -->
-
-<!-- # 2. Append the data (assuming you want to combine all dataframes into one) -->
-<!-- combined_data <- do.call(rbind, lapply(suburb_data_list, function(x) x)) -->
-
+get_suburbs_data <- function(suburb_list) { -->
+  all_data <- list() -->
+  for (suburb_info in suburb_list) { -->
+    location <- suburb_info[[1]] -->
+    lat <- suburb_info[[2]] -->
+    lon <- suburb_info[[3]] -->
+    suburb_data <- get_l_suburb(location, lat, lon) -->
+    all_data[[location]] <- suburb_data -->
+  } -->
+  return(all_data) -->
+} -->
+suburb_list <- list( -->
+  list("2122/eastwood/", -33.7899, 151.0821), -->
+  list("2144/auburn/", -33.8490, 151.0329) -->
+) -->
+suburb_data_list <- get_suburbs_data(suburb_list) -->
+1. Print the list -->
+print(suburb_data_list) -->
+2. Append the data (assuming you want to combine all dataframes into one) -->
+combined_data <- do.call(rbind, lapply(suburb_data_list, function(x) x)) -->
 ```
 

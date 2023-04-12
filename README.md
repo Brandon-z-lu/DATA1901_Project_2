@@ -1,5 +1,9 @@
 # README
 
+## Apr 12: log
+
+- [ ] Note that after `setting the working directory`, you need to include the `relative path` only: DO NOT INCLUDE the `/` at the front!!! **E.g., "csv_cache/l_2122_eastwood_houseprice.csv"** is valide while "csv_cache/l_2122_eastwood_houseprice.csv" is NOT!
+
 ## Apr 12: tomorrow plan
 - [ ] Complete the `universal` function `get_suburbs_data`
 - [ ] Increase the scope of research to 10 or even 15 suburbs
@@ -17,26 +21,26 @@
     - Tomorrow, I will add a more general function
     - 
 ```
-# get_suburbs_data <- function(suburb_list) { -->
-#   all_data <- list() -->
-#   for (suburb_info in suburb_list) { -->
-#     location <- suburb_info[[1]] -->
-#     lat <- suburb_info[[2]] -->
-#     lon <- suburb_info[[3]] -->
-#     suburb_data <- get_l_suburb(location, lat, lon) -->
-#     all_data[[location]] <- suburb_data -->
-#   } -->
-#   return(all_data) -->
-# } -->
-# suburb_list <- list( -->
-#   list("2122/eastwood/", -33.7899, 151.0821), -->
-#   list("2144/auburn/", -33.8490, 151.0329) -->
-# ) -->
-# suburb_data_list <- get_suburbs_data(suburb_list) -->
-# # 1. Print the list -->
-# print(suburb_data_list) -->
-# # 2. Append the data (assuming you want to combine all dataframes into one) -->
-# combined_data <- do.call(rbind, lapply(suburb_data_list, function(x) x)) -->
+get_suburbs_data <- function(suburb_list) { -->
+  all_data <- list() -->
+  for (suburb_info in suburb_list) { -->
+    location <- suburb_info[[1]] -->
+    lat <- suburb_info[[2]] -->
+    lon <- suburb_info[[3]] -->
+    suburb_data <- get_l_suburb(location, lat, lon) -->
+    all_data[[location]] <- suburb_data -->
+  } -->
+  return(all_data) -->
+} -->
+suburb_list <- list( -->
+  list("2122/eastwood/", -33.7899, 151.0821), -->
+  list("2144/auburn/", -33.8490, 151.0329) -->
+) -->
+suburb_data_list <- get_suburbs_data(suburb_list) -->
+1. Print the list -->
+print(suburb_data_list) -->
+2. Append the data (assuming you want to combine all dataframes into one) -->
+combined_data <- do.call(rbind, lapply(suburb_data_list, function(x) x)) -->
 ```
 ## From Apr 10, 2023 **Brandon Lu** (Sorry for the American date format) 
 
