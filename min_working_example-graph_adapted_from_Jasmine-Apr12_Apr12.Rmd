@@ -52,19 +52,19 @@ l_auburn_dist2 <-l_auburn_dist[, -1]
 ### Graphing (general plots but realised they don't show much trend, so tried to control for variables later)
 **Note that the operations above shouldn't affect the operations below as after all, the followin code is searching based on the `key` in a dictionary rather than based on an `index` in an array**
 ```{r}
-# ggplot(l_parramatta_dist, aes(x=distance_to_train_station, y=soldprice))+
-#   geom_point(aes(color=bedroom))+
-#   scale_colour_gradient(low="pink")+
-#   labs(title = "Sale Price of Townhouses vs Distance to Train Station", x="Distance to Local Train Station (m)", y="Sale Price ($)")+
-#   theme(plot.title = element_text(hjust = 0.5))+
-#   theme_linedraw()
-# 
-# ggplot(l_merrylands_dist, aes(x=distance_to_train_station, y=soldprice))+
-#   geom_point(aes(color=bedroom))+
-#   scale_colour_gradient(low="blue")+
-#   labs(title = "Sale Price of Townhouses vs Distance to Train Station", x="Distance to Local Train Station (m)", y="Sale Price ($)")+
-#   theme(plot.title = element_text(hjust = 0.5))+
-#   theme_linedraw()
+ggplot(l_parramatta_dist, aes(x=distance_to_train_station, y=soldprice))+
+  geom_point(aes(color=bedroom))+
+  scale_colour_gradient(low="pink")+
+  labs(title = "Sale Price of Townhouses vs Distance to Train Station", x="Distance to Local Train Station (m)", y="Sale Price ($)")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme_linedraw()
+
+ggplot(l_merrylands_dist, aes(x=distance_to_train_station, y=soldprice))+
+  geom_point(aes(color=bedroom))+
+  scale_colour_gradient(low="blue")+
+  labs(title = "Sale Price of Townhouses vs Distance to Train Station", x="Distance to Local Train Station (m)", y="Sale Price ($)")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme_linedraw()
 
 ggplot(l_auburn_dist, aes(x=distance_to_train_station, y=soldprice))+
   geom_point(aes(color=bedroom))+
@@ -80,17 +80,17 @@ ggplot(l_eastwood_dist, aes(x=distance_to_train_station, y=soldprice))+
   theme(plot.title = element_text(hjust = 0.5))+
   theme_linedraw()
 
-# ggplot(l_granville_dist, aes(x=distance_to_train_station, y=soldprice))+
-#   geom_point(aes(color=factor(bedroom)))+
-#   labs(title = "Sale Price of Townhouses vs Distance to Train Station", x="Distance to Local Train Station (m)", y="Sale Price ($)")+
-#   theme(plot.title = element_text(hjust = 0.5))+
-#   theme_linedraw()
-# 
-# ggplot(l_granville_dist, aes(x=distance_to_train_station, y=soldprice))+
-#   geom_point(aes(color=factor(bedroom)))+
-#   labs(title = "Sale Price of Townhouses vs Distance to Train Station", x="Distance to Local Train Station (m)", y="Sale Price ($)")+
-#   theme(plot.title = element_text(hjust = 0.5))+
-#   theme_linedraw()
+ggplot(l_granville_dist, aes(x=distance_to_train_station, y=soldprice))+
+  geom_point(aes(color=factor(bedroom)))+
+  labs(title = "Sale Price of Townhouses vs Distance to Train Station", x="Distance to Local Train Station (m)", y="Sale Price ($)")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme_linedraw()
+
+ggplot(l_granville_dist, aes(x=distance_to_train_station, y=soldprice))+
+  geom_point(aes(color=factor(bedroom)))+
+  labs(title = "Sale Price of Townhouses vs Distance to Train Station", x="Distance to Local Train Station (m)", y="Sale Price ($)")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme_linedraw()
 ```
 
 
