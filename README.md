@@ -1,4 +1,13 @@
-# README
+# README **written by Brandon Lu**
+
+## What we need to do next!!
+### Best case
+- [ ] Validate the automatic `py` scraping program
+- [ ] Generate all files available in the `csv` format
+##### This will be left to ALL GROUP MEMBERS; I think it's best for all of us to think about what we can do with all this data
+- [ ] Write new prgrams for all these files and figure out how we can have at least an insight
+### Worst case
+- [ ] Can @Jasmine send your `last resort file` to me so that I can upload it to all people to see?
 
 ## Apr 12: log
 
