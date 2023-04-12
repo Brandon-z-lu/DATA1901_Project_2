@@ -16,34 +16,27 @@ getwd()
 ```
 
 ```{r}
-# mytext <- readLines("README.md")
-# cat(mytext, sep = "\n")
-
 # Reading the `csv` files
-# l_parramatta_dist <- read.csv("~/csv_cache/l_parramatta_houseprice.csv")
-# l_merrylands_dist <- read.csv("~/csv_cache/l_merrylands_houseprice.csv")
+l_parramatta_dist <- read.csv("csv_cache/l_2150_parramatta_houseprice.csv")
+l_merrylands_dist <- read.csv("csv_cache/l_2160_merrylands_houseprice.csv")
 l_eastwood_dist <- read.csv("csv_cache/l_2122_eastwood_houseprice.csv")
 l_auburn_dist <- read.csv("csv_cache/l_2144_auburn_houseprice.csv")
-# l_granville_dist <- read.csv("~/csv_cache/l_granville_houseprice.csv")
+l_granville_dist <- read.csv("csv_cache/l_2142_granville_houseprice.csv")
 
 # Categorize the data set `l_parramatta_dist` into different distance categories
-# l_parramatta_dist$"distance_to_train_station(km)" <- l_parramatta_dist$distance_to_train_station/1000
-
+l_parramatta_dist$"distance_to_train_station(km)" <- l_parramatta_dist$distance_to_train_station/1000
 l_auburn_dist$"distance_to_train_station(km)" <- l_auburn_dist$distance_to_train_station/1000
-
-# l_merrylands_dist$"distance_to_train_station(km)" <- l_merrylands_dist$distance_to_train_station/1000
-
+l_merrylands_dist$"distance_to_train_station(km)" <- l_merrylands_dist$distance_to_train_station/1000
 l_eastwood_dist$"distance_to_train_station(km)" <- l_eastwood_dist$distance_to_train_station/1000
+l_granville_dist$"distance_to_train_station(km)" <- l_granville_dist$distance_to_train_station/1000
 
-# l_granville_dist$"distance_to_train_station(km)" <- l_granville_dist$distance_to_train_station/1000
+# Removing that `FIRST` row of previous `dist`
+l_parramatta_dist2 <- l_parramatta_dist[, -1]
+l_eastwood_dist2 <- l_eastwood_dist[, -1]
+l_merrylands_dist2 <-l_merrylands_dist[, -1]
+l_granville_dist2 <-l_granville_dist[, -1]
+l_auburn_dist2 <-l_auburn_dist[, -1]
 
-# # Removing that `FIRST` row of previous `dist` 
-# l_parramatta_dist2 <- l_parramatta_dist[, -1] 
-# l_eastwood_dist2 <- l_eastwood_dist[, -1]
-# l_merrylands_dist2 <-l_merrylands_dist[, -1]
-# l_granville_dist2 <-l_granville_dist[, -1]
-# l_auburn_dist2 <-l_auburn_dist[, -1]
-# 
 # # Writing the `csv` files into a new folder `Long Lat Dist Suburb Data`
 # write.csv(l_parramatta_dist2, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Long Lat Dist Suburb Data/l_parramatta_houseprice.csv", row.names=TRUE)
 # 
@@ -141,11 +134,11 @@ ggplot(parramatta_3bed, aes(x = distance_to_train_station, y = soldprice/100000)
 
 ## Classing distance (This section was for parramatta specifically, if you want to keep this graphical representation, then the same code can be used for all other suburbs too)
 ```{r}
-# l_parramatta_dist$distance_class <- cut(l_parramatta_dist$"distance_to_train_station(km)",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500,3.000,3.250,3.500,3.750, 4.000))
-# l_merrylands_dist$distance_class <- cut(l_merrylands_dist$"distance_to_train_station(km)",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500, 3.000,3.250,3.500,3.750, 4.000))
+l_parramatta_dist$distance_class <- cut(l_parramatta_dist$"distance_to_train_station(km)",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500,3.000,3.250,3.500,3.750, 4.000))
+l_merrylands_dist$distance_class <- cut(l_merrylands_dist$"distance_to_train_station(km)",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500, 3.000,3.250,3.500,3.750, 4.000))
 l_auburn_dist$distance_class <- cut(l_auburn_dist$"distance_to_train_station(km)",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500,3.000,3.250,3.500,3.750, 4.000))
 l_eastwood_dist$distance_class <- cut(l_eastwood_dist$"distance_to_train_station(km)",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500,3.000,3.250,3.500,3.750, 4.000))
-# l_granville_dist$distance_class <- cut(l_granville_dist$"distance_to_train_station(km)",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500,3.000,3.250,3.500,3.750, 4.000))
+l_granville_dist$distance_class <- cut(l_granville_dist$"distance_to_train_station(km)",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500,3.000,3.250,3.500,3.750, 4.000))
 
 ggplot(l_parramatta_dist, aes(x = distance_class, y = soldprice/100000))+
 geom_boxplot() +
