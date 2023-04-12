@@ -13,12 +13,11 @@ setwd("~/DATA1901_Project_2")
 getwd()
 ```
 
-### Creating Data Frames for a general suburb
+### Six basic functions:
 ```{r}
-# HOUSE_SCRAPPING
-# adapted from https://embracingtherandom.com/r/web-scraping/rent-scraping/
-house_scraping <- function(location = "2151/Parramatta/"){
-
+# House scraping: get_df_suburb
+get_df_suburb <- function(location = "2151/Parramatta/"){
+  # adapted from https://embracingtherandom.com/r/web-scraping/rent-scraping/
   # determine how many pages to scroll through 
   url <- paste0("https://www.auhouseprices.com/sold/list/NSW/", 
                 location, 
@@ -34,18 +33,19 @@ house_scraping <- function(location = "2151/Parramatta/"){
   
   df <- NULL
   
+  print(paste0(location, ": begins 0/5"))
   print(paste0( "Current suburb: ", location) )
   print(paste0( "Total pages ", end_page) )
-  for (thispage in c(1:end_page)){
-    # print(paste0( "Processing page ", thispage) )
-    if (thispage %% 5 == 0){
-      print(paste0( "Processing page ", thispage) )
+  for (this_page in c(1:end_page)){
+    # print(paste0( "Processing page ", this_page) )
+    if (this_page %% 5 == 0){
+      print(paste0("Page processed: ", this_page, "/", end_page))
     }
     
     # get website text
     url <- paste0("https://www.auhouseprices.com/sold/list/NSW/", 
                   location, 
-                  thispage, 
+                  this_page, 
                   "/?type=townhouse&ymin=0&ymax=0&bmin=0&bmax=0&pmin=0&pmax=0&sort=date&kw=") # type set to townhouse, no other filtering 
     webpage <- read_html(url)
     
@@ -112,27 +112,37 @@ house_scraping <- function(location = "2151/Parramatta/"){
   df <- df %>% mutate(House_ID = 1:nrow(.))
 
   # move the "index" column to the front of the data frame
-  df <- df[, c("index", names(df)[-ncol(df)])]
+  df <- df[, c("House_ID", names(df)[-ncol(df)])]
+  
+  print(paste0(location, ": 1/4: get_df_suburb: creating data frame done!"))
+  print(paste0("Page processed: ", this_page, "/", end_page))
   return(df)
 }
-```
 
-### Before generalization
-```{r}
-data_distance_between <- function(lat, lon, fixed_lat, fixed_lon) {
+
+get_l_suburb <- function(df_suburb, suburb_lat, suburb_lon) {
+  l_suburb <- df_suburb %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
+  print(paste0(location, ": 2/4: get_l_suburb: done!"))
+  return(l_suburb)
+}
+
+
+add_distance_between <- function(lat, lon, fixed_lat, fixed_lon) {
   dist <- distHaversine(c(lon, lat), c(fixed_lon, fixed_lat))
   return(dist)
 }  
 
-get_l_suburb <- function(location, suburb_lat, suburb_lon) {
-  df_suburb <- house_scraping(location)
-  l_suburb <- df_suburb %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
-  
+
+get_l_suburb_dist <- function(l_suburb, suburb_lat, suburb_lon)   {
   l_suburb_dist <- data.frame(
     l_suburb, distance_to_train_station = apply(
-      l_suburb[,c("latitude","longitude")], 1, function(x) data_distance_between(x[1], x[2], suburb_lat, suburb_lon))
+      l_suburb[,c("latitude","longitude")], 1, function(x) add_distance_between(x[1], x[2], suburb_lat, suburb_lon))
   )
-  
+  print(paste0(location, ": 3/4: get_l_suburb_dist: done!"))
+  return(l_suburb_dist)
+}
+
+export_l_suburb_dist_csv <- function(location, l_suburb_dist) {
   # Writing the `l_granville_houseprice.csv` file in "~/csv_cache/"
   if (!dir.exists("~/csv_cache")) {
     dir.create("csv_cache")  # create directory if it doesn't exist
@@ -141,10 +151,25 @@ get_l_suburb <- function(location, suburb_lat, suburb_lon) {
   print(file_name)
   file_path <- file.path("csv_cache", file_name)  # specify file path
   write.csv(l_suburb_dist, file_path, row.names = FALSE)  # export as CSV file
-  print("Finish csv export")
+  print(paste0(location, ": 4/4: export_l_suburb_dist_csv: done!"))
+  return("Result: csv export finished")
 }
-get_l_suburb("2122/eastwood/", -33.7899, 151.0821)
-get_l_suburb("2144/auburn/", -33.8490, 151.0329)
+
+export_a_suburb <- function(location, suburb_lat, suburb_lon) {
+  df_suburb <- get_df_suburb(location)
+  l_subrub <- get_l_suburb(df_suburb, suburb_lat, suburb_lon)
+  l_suburb_dist <- get_l_suburb_dist(l_suburb, suburb_lat, suburb_lon)
+  export_l_suburb_dist_csv(location, l_suburb_dist)
+  print(paste0(location, ": Finish csv export"))
+  
+}
+```
+
+### Before generalization
+```{r}
+
+export_a_suburb("2122/eastwood/", -33.7899, 151.0821)
+# export_a_suburb("2144/auburn/", -33.8490, 151.0329)
 
 ```
 
