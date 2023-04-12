@@ -2,13 +2,25 @@
 
 ## Apr 12: log
 
-- [ ] Note that after `setting the working directory`, you need to include the `relative path` only: DO NOT INCLUDE the `/` at the front!!! **E.g., "csv_cache/l_2122_eastwood_houseprice.csv"** is valide while "csv_cache/l_2122_eastwood_houseprice.csv" is NOT!
+- 12 pm: the universal function now works as expected: `min_working_example-before_graph_analysis_Apr12.rmd`
+    - Function: export_all_suburbs()
+    - Input: suburbs.txt
+    - Note that: if you have `# "2142/granville/", -33.8326, 151.0120` in the `txt` file, the program is automatically configured to skip that line/entry
+    - Also note that: it seems that if you don't delete the `csv` files in the `csv_cache` folder, the program will also skip that suburbs. So delete it if you want a fresh export
+    - Output: in `csv_cache`
+    - Note: for the outputs, **look at the first column!!! It has changed!!!**
+
+- Contribution and Implication:
+    - **You now can add as many suburbs as you want very efficiently in the `suburbs.txt` file, and avoid repeately exporting `csv` file to save time**
+    - You now can drastically reduce the random error by incorporating mass data into your research     - You now has a much more encapsulated functions as in the `min_working_example-before_graph_analysis_Apr12.rmd` file so that you can edit the functions in that file with ease 
+
+- [x] Note that after `setting the working directory`, you need to include the `relative path` only: DO NOT INCLUDE the `/` at the front!!! **E.g., "csv_cache/l_2122_eastwood_houseprice.csv"** is valide while "csv_cache/l_2122_eastwood_houseprice.csv" is NOT!
 
 ## Apr 12: tomorrow plan
-- [ ] Complete the `universal` function `get_suburbs_data`
-- [ ] Increase the scope of research to 10 or even 15 suburbs
-- [ ] Export all 15 files in the `csv` format
-- [ ] **Give the `csv` files to Jasmine and Bjungjun for future processing**
+- [x] Complete the `universal` function `get_suburbs_data`
+- [x] Increase the scope of research to 10 or even 15 suburbs
+- [x] Export all 15 files in the `csv` format
+- [x] **Give the `csv` files to Jasmine and Bjungjun for future processing**
 
 *Ideally, the increased amount of data should make the data seem less random. And we can actually see a trend from it. I'll also be experimenting different methods to try to get a trend.*
 

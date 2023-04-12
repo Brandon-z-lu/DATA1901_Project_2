@@ -160,18 +160,14 @@ export_a_suburb <- function(location, suburb_lat, suburb_lon) {
 }
 ```
 
-### Before generalization
-```{r}
-export_a_suburb("2122/eastwood/", -33.7899, 151.0821)
-export_a_suburb("2144/auburn/", -33.8490, 151.0329)
-
-```
-
 ### More general version
 ```{r, eval=FALSE}
 export_all_suburbs <- function(file_name) {
   # Read the input file
-  suburbs_input <- read.table(file_name, header = FALSE, sep = ",", col.names = c("location", "latitude", "longitude"), strip.white = TRUE)
+  suburbs_input <- read.table(file_name, header = FALSE, sep = ",", col.names = c("location", "latitude", "longitude"), strip.white = TRUE, comment.char = "", quote = "")
+  
+  # Filter out rows starting with a '#' character
+  suburbs_input <- suburbs_input[!grepl("^#", suburbs_input$location), ]
   
   # Loop through each row in the input file and call export_a_suburb function
   for (i in 1:nrow(suburbs_input)) {
@@ -185,8 +181,9 @@ export_all_suburbs <- function(file_name) {
   return(NULL)
 }
 
-export_all_suburbs("suburbs.txt")
 
-# Exported files: "csv_cache/"
+# https://sydneysuburbreviews.com/inner-west-suburb-rankings/ <-- this site was used to cover all major suburbs 
+
+# Exported files stored in "csv_cache/"
 ```
 
