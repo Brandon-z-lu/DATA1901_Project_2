@@ -114,13 +114,13 @@ get_df_suburb <- function(location = "2151/Parramatta/"){
   # move the "index" column to the front of the data frame
   df <- df[, c("House_ID", names(df)[-ncol(df)])]
   
-  print(paste0(location, ": 1/4: get_df_suburb: creating data frame done!"))
   print(paste0("Page processed: ", this_page, "/", end_page))
+  print(paste0(location, ": 1/4: get_df_suburb: creating data frame done!"))
   return(df)
 }
 
 
-get_l_suburb <- function(df_suburb, suburb_lat, suburb_lon) {
+get_l_suburb <- function(df_suburb, suburb_lat, suburb_lon, location) {
   l_suburb <- df_suburb %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
   print(paste0(location, ": 2/4: get_l_suburb: done!"))
   return(l_suburb)
@@ -142,6 +142,7 @@ get_l_suburb_dist <- function(l_suburb, suburb_lat, suburb_lon)   {
   return(l_suburb_dist)
 }
 
+
 export_l_suburb_dist_csv <- function(location, l_suburb_dist) {
   # Writing the `l_granville_houseprice.csv` file in "~/csv_cache/"
   if (!dir.exists("~/csv_cache")) {
@@ -155,20 +156,23 @@ export_l_suburb_dist_csv <- function(location, l_suburb_dist) {
   return("Result: csv export finished")
 }
 
+
 export_a_suburb <- function(location, suburb_lat, suburb_lon) {
   df_suburb <- get_df_suburb(location)
-  l_subrub <- get_l_suburb(df_suburb, suburb_lat, suburb_lon)
+  l_subrub <- get_l_suburb(df_suburb, suburb_lat, suburb_lon, location)
   l_suburb_dist <- get_l_suburb_dist(l_suburb, suburb_lat, suburb_lon)
   export_l_suburb_dist_csv(location, l_suburb_dist)
   print(paste0(location, ": Finish csv export"))
-  
 }
+
+export_a_suburb("2122/eastwood/", -33.7899, 151.0821)
+
 ```
 
 ### Before generalization
 ```{r}
 
-export_a_suburb("2122/eastwood/", -33.7899, 151.0821)
+# export_a_suburb("2122/eastwood/", -33.7899, 151.0821)
 # export_a_suburb("2144/auburn/", -33.8490, 151.0329)
 
 ```
