@@ -36,7 +36,7 @@ get_df_suburb <- function(location = "2151/Parramatta/"){
   print(paste0(location, ": begins 0/4"))
   print(paste0( "Current suburb: ", location) )
   print(paste0( "Total pages ", end_page) )
-  for (this_page in c(1:10)){
+  for (this_page in c(1:end_page)){
     # print(paste0( "Processing page ", this_page) )
     if (this_page %% 5 == 0){
       print(paste0("Page processed: ", this_page, "/", end_page))
@@ -120,22 +120,15 @@ get_df_suburb <- function(location = "2151/Parramatta/"){
 }
 
 
-get_l_suburb <- function(df_suburb, location) {
-  l_suburb <- df_suburb %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
-  print(paste0(location, ": 2/4: get_l_suburb: done!"))
-  # print(l_suburb) ###
-  return(l_suburb)
-}
-
-
 add_distance_between <- function(lat, lon, fixed_lat, fixed_lon) {
   dist <- distHaversine(c(lon, lat), c(fixed_lon, fixed_lat))
   return(dist)
 }  
 
 
-get_l_suburb_dist <- function(l_suburb, suburb_lat, suburb_lon, location) {
-  # print(l_suburb) ###
+get_l_suburb_dist <- function(df_suburb, suburb_lat, suburb_lon, location) {
+  l_suburb <- df_suburb %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
+  print(paste0(location, ": 2/4: get_l_suburb: done!"))
   l_suburb_dist <- data.frame(
     l_suburb, distance_to_train_station = apply(
       l_suburb[,c("latitude","longitude")], 1, function(x) add_distance_between(x[1], x[2], suburb_lat, suburb_lon))
@@ -161,45 +154,39 @@ export_l_suburb_dist_csv <- function(location, l_suburb_dist) {
 
 export_a_suburb <- function(location, suburb_lat, suburb_lon) {
   df_suburb <- get_df_suburb(location)
-  l_subrub <- get_l_suburb(df_suburb, location)
-  l_suburb_dist <- get_l_suburb_dist(l_suburb, suburb_lat, suburb_lon, location)
+  l_suburb_dist <- get_l_suburb_dist(df_suburb, suburb_lat, suburb_lon, location)
   export_l_suburb_dist_csv(location, l_suburb_dist)
   print(paste0(location, ": Finish csv export"))
 }
-
-export_a_suburb("2122/eastwood/", -33.7899, 151.0821)
-
 ```
 
 ### Before generalization
 ```{r}
-
-# export_a_suburb("2122/eastwood/", -33.7899, 151.0821)
-# export_a_suburb("2144/auburn/", -33.8490, 151.0329)
+export_a_suburb("2122/eastwood/", -33.7899, 151.0821)
+export_a_suburb("2144/auburn/", -33.8490, 151.0329)
 
 ```
 
 ### More general version
 ```{r, eval=FALSE}
-get_suburbs_data <- function(suburb_list) { -->
-  all_data <- list() -->
-  for (suburb_info in suburb_list) { -->
-    location <- suburb_info[[1]] -->
-    lat <- suburb_info[[2]] -->
-    lon <- suburb_info[[3]] -->
-    suburb_data <- get_l_suburb(location, lat, lon) -->
-    all_data[[location]] <- suburb_data -->
-  } -->
-  return(all_data) -->
-} -->
-suburb_list <- list( -->
-  list("2122/eastwood/", -33.7899, 151.0821), -->
-  list("2144/auburn/", -33.8490, 151.0329) -->
-) -->
-suburb_data_list <- get_suburbs_data(suburb_list) -->
-1. Print the list -->
-print(suburb_data_list) -->
-2. Append the data (assuming you want to combine all dataframes into one) -->
-combined_data <- do.call(rbind, lapply(suburb_data_list, function(x) x)) -->
+export_all_suburbs <- function(file_name) {
+  # Read the input file
+  suburbs_input <- read.table(file_name, header = FALSE, sep = ",", col.names = c("location", "latitude", "longitude"), strip.white = TRUE)
+  
+  # Loop through each row in the input file and call export_a_suburb function
+  for (i in 1:nrow(suburbs_input)) {
+    location <- as.character(suburbs_input[i, "location"])
+    latitude <- as.numeric(suburbs_input[i, "latitude"])
+    longitude <- as.numeric(suburbs_input[i, "longitude"])
+    
+    export_a_suburb(location, latitude, longitude)
+  }
+  
+  return(NULL)
+}
+
+export_all_suburbs("suburbs.txt")
+
+# Exported files: "csv_cache/"
 ```
 
