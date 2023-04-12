@@ -1,0 +1,28 @@
+eastwood
+granville
+parramatta
+tempe
+hurtsville
+sydney
+wolli creek
+# temp
+# Testing for random places
+Canada
+toronto
+melbourne
+beijing
+Marrickville
+Darling harbor
+Darling harbour
+# Testing for extreme cases
+# 1. Macquarie to the south
+Macquarie Park
+Ashfield
+# 2. Ashfield to the east
+Bondi Beach
+# 3. Proximity
+North Bondi
+# 4. North and center
+Chatswood
+# 
+Blue Mountains
