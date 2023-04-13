@@ -12,7 +12,7 @@ def write_suburbs_to_file(suburb_names):
 
 
 def update_suburbs_file():
-    os.system("python get_suburbs.py")
+    os.system("python3 get_suburbs.py")
     with open("get_suburbs_data/get_suburbs_out.txt", "r") as f:
         suburbs_content = f.readlines()
     with open("suburbs.txt", "w") as f:
