@@ -40,13 +40,8 @@ get_df_suburb <- function(location = "2151/Parramatta/"){
     print(paste0(location, ": begins 0/4"))
     print(paste0( "Current suburb: ", location) )
     print(paste0( "Total pages ", end_page) )
-  }, error = function(e) {
-    # Error handling code
-    message("An error occurred: ", e$message)
-    return(NULL)
-  })
-
-  for (this_page in c(1:end_page)){
+    
+    for (this_page in c(1:end_page)){
     # print(paste0( "Processing page ", this_page) )
     if (this_page %% 5 == 0){
       print(paste0("Page processed: ", this_page, "/", end_page))
@@ -60,30 +55,12 @@ get_df_suburb <- function(location = "2151/Parramatta/"){
     webpage <- read_html(url)
     
     result <- webpage  %>%  html_nodes("li") %>%  html_text() 
-    
-    print(result)
-    if (length(result) == 0) {
-      return(NULL)
-    }
-    
     # end of the relevant content 
     result <-  result[ 1: grep("current", result) ]
-    print(result)
-    if (length(result) == 0) {
-      return(NULL)
-    }
     # remove the redundant "listed price" 
     result <-  result[ !grepl("List", result) ]
-    print(result)
-    if (length(result) == 0) {
-      return(NULL)
-    }
     # remove the price listed with rent
     result <-  result[ !grepl("Rent", result) ]
-    print(result)
-    if (length(result) == 0) {
-      return(NULL)
-    }
     
     # filter information on price and number of bedroom/bathroom/carspace
     price_bedroom  <- result[ grep("\\$", result)]
@@ -143,6 +120,11 @@ get_df_suburb <- function(location = "2151/Parramatta/"){
   print(paste0("Page processed: ", this_page, "/", end_page))
   print(paste0(location, ": 1/4: get_df_suburb: creating data frame done!"))
   return(df)
+  }, error = function(e) {
+    # Error handling code
+    message("An error occurred: ", e$message)
+    return(NULL)
+  })
 }
 
 
