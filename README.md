@@ -1,13 +1,49 @@
 # README **written by Brandon Lu**
 
-## What we need to do next!!
+## Repo structure
+```
+.
+├── Jasmine_files // Archived
+├── README.md
+
+├── csv_cache 
+// Exported data: exported from `min_working_example-before_graph_analysis_Apr12.rmd`
+// to be imported into `min_working_example-graph_adapted_from_Jasmine-Apr12_Apr12.Rmd`
+
+├── df_files // Archived dependencies for `Jasmine_files`
+
+├── get_suburbs.py 
+// Input: a list of suburb; 
+// Output: a list of suburb along with the postcode and geometric coordination
+
+├── get_suburbs_by_areas.py // Archived
+├── get_suburbs_by_areas_data
+
+├── get_suburbs_data // Output data for `get_suburbs_data.py`
+
+├── get_train_station_names.py 
+├── get_train_station_names_data
+// Get all the train stations from the wikipedia link:
+// url = "https://en.wikipedia.org/wiki/List_of_Sydney_Trains_railway_stations"
+
+├── l_files // Archived
+
+├── min_working_example-before_graph_analysis_Apr12.html
+├── min_working_example-before_graph_analysis_Apr12.rmd
+├── min_working_example-graph_adapted_from_Jasmine-Apr12_Apr12.Rmd
+├── min_working_example-graph_adapted_from_Jasmine-Apr12_Apr12.html
+
+└── suburbs.txt // Input for `min_working_example-before_graph_analysis_Apr12.rmd`
+```
+
+## What's next?
 ### Best case
-- [ ] Validate the automatic `py` scraping program
-- [ ] Generate all files available in the `csv` format
+- [x] Validate the automatic `py` scraping program
+- [x] Generate all files available in the `csv` format
 ##### This will be left to ALL GROUP MEMBERS; I think it's best for all of us to think about what we can do with all this data
-- [ ] Write new prgrams for all these files and figure out how we can have at least an insight
+- [x] Write new prgrams for all these files and figure out how we can have at least an insight
 ### Worst case
-- [ ] Can @Jasmine send your `last resort file` to me so that I can upload it to all people to see?
+- [x] Can @Jasmine send your `last resort file` to me so that I can upload it to all people to see?
 
 ## Apr 12: log
 

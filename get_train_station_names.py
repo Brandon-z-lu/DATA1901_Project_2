@@ -1,29 +1,36 @@
 import requests
+import os
 from bs4 import BeautifulSoup
-import warnings
-from urllib3.exceptions import InsecureRequestWarning
 
-# Suppress SSL warnings
-warnings.simplefilter('ignore', InsecureRequestWarning)
-
-
-URL = 'https://nswtrains.fandom.com/wiki/list_of_stations_by_local_government_area'
-
-# Disable SSL verification
+# Disable SSL certificate verification
+requests.packages.urllib3.disable_warnings(
+    requests.packages.urllib3.exceptions.InsecureRequestWarning)
 session = requests.Session()
 session.verify = False
 
-# Use the session to send a GET request to the URL
-page = session.get(URL)
+# Define the URL and fetch the web page
+url = "https://en.wikipedia.org/wiki/List_of_Sydney_Trains_railway_stations"
+response = session.get(url)
 
-soup = BeautifulSoup(page.content, 'html.parser')
+# Parse the HTML with BeautifulSoup
+soup = BeautifulSoup(response.content, "html.parser")
 
-results = soup.find(id='mw-content-text')
-rows = results.find_all('tr')
+# Find the table with the list of Sydney Trains railway stations
+table = soup.find("table", {"class": "wikitable sortable"})
 
-for row in rows:
-    data = row.find_all('td')
-    if len(data) == 3:
-        print(data[0].text.strip())
+# Extract the station names from the table
+stations = []
+for row in table.findAll("tr")[1:]:
+    cell = row.findAll("td")[0]
+    station_name = cell.get_text(strip=True)
+    stations.append(station_name)
 
-print("Done!")
+# Create the folder 'get_train_station_names_data' if it doesn't exist
+os.makedirs('get_train_station_names_data', exist_ok=True)
+
+# Export the station names to a text file
+with open('get_train_station_names_data/get_train_station_names_out.txt', 'w') as file:
+    for station in stations:
+        file.write(f"{station}\n")
+
+print("get_train_station_names done!!")
