@@ -1,6 +1,19 @@
 import subprocess
 import time
 
+'''
+:param: 
+interval = 10 seconds until 30 seconds
+
+:return:
+1. RUN if_analysis_works.py
+2. RUN min_working_example-before_graph_analysis_Apr12.r to write in "csv/"
+3. Wait for 2.  to finish and buffer tiem interval = 10 seconds
+4. repeat from 1.
+
+(trimming down)
+'''
+
 
 def main():
     start_time = time.time()

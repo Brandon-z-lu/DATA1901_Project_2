@@ -1,5 +1,12 @@
 import os
 
+'''
+:param: "suburbs.txt" as the input
+:return: compare the "suburbs.txt" with the "csv_cache/" file names, 
+if not included, run the "python3 get_suburbs.py" to 
+write to "get_suburbs_data/get_suburbs_out.txt"
+'''
+
 
 def extract_suburb_name(line):
     return line.split("/")[-2].strip()
@@ -18,7 +25,7 @@ def update_suburbs_file():
         suburbs_content = f.readlines()
     with open("suburbs.txt", "w") as f:
         f.writelines(suburbs_content)
-    print("suburbs.txt UPDATED!")
+    print("python3 get_suburbs.py DONE!")
 
 
 def main():

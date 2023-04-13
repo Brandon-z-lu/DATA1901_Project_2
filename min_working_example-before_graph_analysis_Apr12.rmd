@@ -21,10 +21,11 @@ get_df_suburb <- function(location = "2151/Parramatta/"){
   # adapted from https://embracingtherandom.com/r/web-scraping/rent-scraping/
   # determine how many pages to scroll through 
   location <- gsub("\\s+", "+", location)
+  print(location)
   url <- paste0("https://www.auhouseprices.com/sold/list/NSW/", 
                 location, 
                 "1/?type=townhouse&ymin=0&ymax=0&bmin=0&bmax=0&pmin=0&pmax=0&sort=date&kw=") # type set to townhouse, no other filtering
-  
+  print(url)
   webpage <- read_html(url)
   
   # get the number of properties and the number of property displayed on each page 
@@ -182,14 +183,34 @@ export_all_suburbs_parallel <- function(file_name, num_cores = detectCores()) {
   
   return(NULL)
 }
+
+
+export_all_suburbs <- function(file_name) {
+  # Read the input file
+  suburbs_input <- read.table(file_name, header = FALSE, sep = ",", col.names = c("location", "latitude", "longitude"), strip.white = TRUE, comment.char = "", quote = "")
+  
+  # Filter out rows starting with a '#' character
+  suburbs_input <- suburbs_input[!grepl("^#", suburbs_input$location), ]
+  
+  # Loop through each row in the input file and call export_a_suburb function
+  for (i in 1:nrow(suburbs_input)) {
+    location <- as.character(suburbs_input[i, "location"])
+    latitude <- as.numeric(suburbs_input[i, "latitude"])
+    longitude <- as.numeric(suburbs_input[i, "longitude"])
+    
+    export_a_suburb(location, latitude, longitude)
+  }
+  
+  return(NULL)
+}
 ```
 
 
 ## Export all
 ```{r}
-# export_all_suburbs("suburbs.txt")
+export_all_suburbs("suburbs.txt")
 
 # Run the parallelized function
-export_all_suburbs_parallel("suburbs.txt")
+# export_all_suburbs_parallel("suburbs.txt")
 ```
 
