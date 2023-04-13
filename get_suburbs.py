@@ -57,10 +57,6 @@ def main(input_file, output_file):
                 print(f"{index + 1}/{num_suburbs}: {suburb} NOT FOUND!!!")
                 not_found.append(suburb)
 
-    print("\nSuburbs not found in the Greater Sydney area:")
-    for suburb in not_found:
-        print(suburb)
-
 
 if __name__ == "__main__":
     folder_name = "get_suburbs_data"

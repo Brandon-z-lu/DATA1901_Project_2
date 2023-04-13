@@ -9,6 +9,7 @@ def write_suburbs_to_file(suburb_names):
     with open("get_suburbs_data/get_suburbs_in.txt", "w") as f:
         for suburb_name in suburb_names:
             f.write(f"{suburb_name}\n")
+    print("get_suburbs_data/get_suburbs_in.txt DONE!")
 
 
 def update_suburbs_file():
@@ -17,6 +18,7 @@ def update_suburbs_file():
         suburbs_content = f.readlines()
     with open("suburbs.txt", "w") as f:
         f.writelines(suburbs_content)
+    print("suburbs.txt UPDATED!")
 
 
 def main():
