@@ -156,24 +156,21 @@ export_a_suburb <- function(location, suburb_lat, suburb_lon) {
 }
 
 
-export_all_suburbs_parallel <- function(file_name, num_cores = detectCores()) {
+export_all_suburbs <- function(file_name) {
   # Read the input file
   suburbs_input <- read.table(file_name, header = FALSE, sep = ",", col.names = c("location", "latitude", "longitude"), strip.white = TRUE, comment.char = "", quote = "")
   
   # Filter out rows starting with a '#' character
   suburbs_input <- suburbs_input[!grepl("^#", suburbs_input$location), ]
   
-  # Function to process a single suburb (used by mclapply)
-  process_suburb <- function(i) {
+  # Loop through each row in the input file and call export_a_suburb function
+  for (i in 1:nrow(suburbs_input)) {
     location <- as.character(suburbs_input[i, "location"])
     latitude <- as.numeric(suburbs_input[i, "latitude"])
     longitude <- as.numeric(suburbs_input[i, "longitude"])
     
     export_a_suburb(location, latitude, longitude)
   }
-  
-  # Process the suburbs in parallel using mclapply
-  mclapply(1:nrow(suburbs_input), process_suburb, mc.cores = num_cores)
   
   return(NULL)
 }
@@ -184,5 +181,5 @@ export_all_suburbs_parallel <- function(file_name, num_cores = detectCores()) {
 # export_all_suburbs("suburbs.txt")
 
 # Run the parallelized function
-export_all_suburbs_parallel("suburbs.txt")
+export_all_suburbs("suburbs.txt")
 
