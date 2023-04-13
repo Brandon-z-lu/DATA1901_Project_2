@@ -1,4 +1,4 @@
-### Setup
+## Setup
 ```{r, echo=F, message=F}
 library(tidygeocoder)
 library(tidyverse)
@@ -14,7 +14,7 @@ setwd("~/DATA1901_Project_2")
 getwd()
 ```
 
-### Six basic functions:
+## Six basic functions:
 ```{r}
 # House scraping: get_df_suburb
 get_df_suburb <- function(location = "2151/Parramatta/"){
@@ -185,7 +185,7 @@ export_all_suburbs_parallel <- function(file_name, num_cores = detectCores()) {
 ```
 
 
-### Export all
+## Export all
 ```{r}
 # export_all_suburbs("suburbs.txt")
 
