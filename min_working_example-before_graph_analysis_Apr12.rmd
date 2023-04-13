@@ -20,6 +20,7 @@ getwd()
 get_df_suburb <- function(location = "2151/Parramatta/"){
   # adapted from https://embracingtherandom.com/r/web-scraping/rent-scraping/
   # determine how many pages to scroll through 
+  location <- gsub("\\s+", "+", location)
   url <- paste0("https://www.auhouseprices.com/sold/list/NSW/", 
                 location, 
                 "1/?type=townhouse&ymin=0&ymax=0&bmin=0&bmax=0&pmin=0&pmax=0&sort=date&kw=") # type set to townhouse, no other filtering
