@@ -1,4 +1,27 @@
 # README **written by Brandon Lu**
+- [README **written by Brandon Lu**](#readme-written-by-brandon-lu)
+  - [Repo structure](#repo-structure)
+  - [What's next?](#whats-next)
+    - [Best case](#best-case)
+        - [This will be left to ALL GROUP MEMBERS; I think it's best for all of us to think about what we can do with all this data](#this-will-be-left-to-all-group-members-i-think-its-best-for-all-of-us-to-think-about-what-we-can-do-with-all-this-data)
+    - [Worst case](#worst-case)
+  - [Apr 12: log](#apr-12-log)
+  - [Apr 12: tomorrow plan](#apr-12-tomorrow-plan)
+  - [From Apr 11, 2023: 'Add `min_work_ex-before_graph.rmd` and successfully run for two suburbs; Add list; De-clutter the code; Reset the `0_sat`'](#from-apr-11-2023-add-min_work_ex-before_graphrmd-and-successfully-run-for-two-suburbs-add-list-de-clutter-the-code-reset-the-0_sat)
+  - [From Apr 10, 2023 **Brandon Lu** (Sorry for the American date format)](#from-apr-10-2023-brandon-lu-sorry-for-the-american-date-format)
+    - [This contains](#this-contains)
+    - [You might want to look at](#you-might-want-to-look-at)
+    - [My progress](#my-progress)
+    - [Implication of my work](#implication-of-my-work)
+  - [Useful resources for learning GitHub](#useful-resources-for-learning-github)
+  - [Useful resources for learning markdown](#useful-resources-for-learning-markdown)
+  - [Apr 10, 2023:](#apr-10-2023)
+    - [9:30 pm](#930-pm)
+    - [Relative path](#relative-path)
+    - [10:00 pm](#1000-pm)
+    - [11:00 pm](#1100-pm)
+    - [12:00 am](#1200-am)
+  - [Questions](#questions)
 
 ## Repo structure
 ```
