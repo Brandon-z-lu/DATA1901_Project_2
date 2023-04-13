@@ -20,25 +20,32 @@ getwd()
 get_df_suburb <- function(location = "2151/Parramatta/"){
   # adapted from https://embracingtherandom.com/r/web-scraping/rent-scraping/
   # determine how many pages to scroll through 
-  location <- gsub("\\s+", "+", location)
-  print(location)
-  url <- paste0("https://www.auhouseprices.com/sold/list/NSW/", 
-                location, 
-                "1/?type=townhouse&ymin=0&ymax=0&bmin=0&bmax=0&pmin=0&pmax=0&sort=date&kw=") # type set to townhouse, no other filtering
-  print(url)
-  webpage <- read_html(url)
-  
-  # get the number of properties and the number of property displayed on each page 
-  find_page_number <- webpage  %>%  html_nodes("h2") %>%  html_text() 
-  find_page_number <- find_page_number[1]
-  numbers <- as.numeric(regmatches(find_page_number, gregexpr("[0-9]+", find_page_number))[[1]])
-  end_page <- ceiling(numbers[3] / numbers[2]) # number of total properties / number on page  = total number of pages
-  
-  df <- NULL
-  
-  print(paste0(location, ": begins 0/4"))
-  print(paste0( "Current suburb: ", location) )
-  print(paste0( "Total pages ", end_page) )
+  tryCatch({
+    location <- gsub("\\s+", "+", location)
+    print(location)
+    url <- paste0("https://www.auhouseprices.com/sold/list/NSW/", 
+                  location, 
+                  "1/?type=townhouse&ymin=0&ymax=0&bmin=0&bmax=0&pmin=0&pmax=0&sort=date&kw=") # type set to townhouse, no other filtering
+    print(url)
+    webpage <- read_html(url)
+    
+    # get the number of properties and the number of property displayed on each page 
+    find_page_number <- webpage  %>%  html_nodes("h2") %>%  html_text() 
+    find_page_number <- find_page_number[1]
+    numbers <- as.numeric(regmatches(find_page_number, gregexpr("[0-9]+", find_page_number))[[1]])
+    end_page <- ceiling(numbers[3] / numbers[2]) # number of total properties / number on page  = total number of pages
+    
+    df <- NULL
+    
+    print(paste0(location, ": begins 0/4"))
+    print(paste0( "Current suburb: ", location) )
+    print(paste0( "Total pages ", end_page) )
+  }, error = function(e) {
+    # Error handling code
+    message("An error occurred: ", e$message)
+    return(NULL)
+  })
+
   for (this_page in c(1:end_page)){
     # print(paste0( "Processing page ", this_page) )
     if (this_page %% 5 == 0){
@@ -54,12 +61,29 @@ get_df_suburb <- function(location = "2151/Parramatta/"){
     
     result <- webpage  %>%  html_nodes("li") %>%  html_text() 
     
+    print(result)
+    if (length(result) == 0) {
+      return(NULL)
+    }
+    
     # end of the relevant content 
     result <-  result[ 1: grep("current", result) ]
+    print(result)
+    if (length(result) == 0) {
+      return(NULL)
+    }
     # remove the redundant "listed price" 
     result <-  result[ !grepl("List", result) ]
+    print(result)
+    if (length(result) == 0) {
+      return(NULL)
+    }
     # remove the price listed with rent
     result <-  result[ !grepl("Rent", result) ]
+    print(result)
+    if (length(result) == 0) {
+      return(NULL)
+    }
     
     # filter information on price and number of bedroom/bathroom/carspace
     price_bedroom  <- result[ grep("\\$", result)]
@@ -156,6 +180,12 @@ export_l_suburb_dist_csv <- function(location, l_suburb_dist) {
 
 export_a_suburb <- function(location, suburb_lat, suburb_lon) {
   df_suburb <- get_df_suburb(location)
+  
+  # Check if df_suburb is NULL (meaning an error occurred in get_df_suburb)
+  if (is.null(df_suburb)) {
+    return(NULL)
+  }
+  
   l_suburb_dist <- get_l_suburb_dist(df_suburb, suburb_lat, suburb_lon, location)
   export_l_suburb_dist_csv(location, l_suburb_dist)
   print(paste0(location, ": Finish csv export"))
@@ -209,8 +239,4 @@ export_all_suburbs <- function(file_name) {
 ## Export all
 ```{r}
 export_all_suburbs("suburbs.txt")
-
-# Run the parallelized function
-# export_all_suburbs_parallel("suburbs.txt")
 ```
-
