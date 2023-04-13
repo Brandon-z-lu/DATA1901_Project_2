@@ -51,7 +51,7 @@ def main(input_file, output_file):
         for index, suburb in enumerate(suburbs):
             postcode, lat, lng = find_suburb(suburb)
             if postcode and lat and lng:
-                f_out.write(f'"{postcode}/{suburb}/", {lat}, {lng}\n')
+                f_out.write(f'{suburb}, {lat}, {lng}\n')
                 print(f"{index + 1}/{num_suburbs}: {suburb} {postcode}")
             else:
                 print(f"{index + 1}/{num_suburbs}: {suburb} NOT FOUND!!!")

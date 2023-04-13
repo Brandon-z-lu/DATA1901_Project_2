@@ -110,7 +110,6 @@ get_df_suburb <- function(location = "2151/Parramatta/"){
   # Borrowed from ChatGPT
   # create a new column called "index" with a sequence of numbers
   df <- df %>% mutate(House_ID = 1:nrow(.))
-
   # move the "index" column to the front of the data frame
   df <- df[, c("House_ID", names(df)[-ncol(df)])]
   
@@ -150,18 +149,13 @@ export_l_suburb_dist_csv <- function(location, l_suburb_dist) {
   print(paste0(location, ": 4/4: export_l_suburb_dist_csv: done!"))
   return("Result: csv export finished")
 }
-
-
 export_a_suburb <- function(location, suburb_lat, suburb_lon) {
   df_suburb <- get_df_suburb(location)
   l_suburb_dist <- get_l_suburb_dist(df_suburb, suburb_lat, suburb_lon, location)
   export_l_suburb_dist_csv(location, l_suburb_dist)
   print(paste0(location, ": Finish csv export"))
 }
-```
 
-### More general version
-```{r, eval=FALSE}
 export_all_suburbs <- function(file_name) {
   # Read the input file
   suburbs_input <- read.table(file_name, header = FALSE, sep = ",", col.names = c("location", "latitude", "longitude"), strip.white = TRUE, comment.char = "", quote = "")
@@ -180,10 +174,11 @@ export_all_suburbs <- function(file_name) {
   
   return(NULL)
 }
-
-
 # https://sydneysuburbreviews.com/inner-west-suburb-rankings/ <-- this site was used to cover all major suburbs 
-
 # Exported files stored in "csv_cache/"
+```
+
+```{r}
+export_all_suburbs("suburbs.txt")
 ```
 
