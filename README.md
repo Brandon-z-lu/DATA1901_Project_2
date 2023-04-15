@@ -1,5 +1,6 @@
 # README **written by Brandon Lu**
 - [README **written by Brandon Lu**](#readme-written-by-brandon-lu)
+  - [TODO](#todo)
   - [Repo structure](#repo-structure)
   - [What's next?](#whats-next)
     - [Best case](#best-case)
@@ -22,6 +23,13 @@
     - [11:00 pm](#1100-pm)
     - [12:00 am](#1200-am)
   - [Questions](#questions)
+
+## TODO
+- [ ] Starting writing transferrables
+- [ ] Jasmine's
+- [ ] Brandon's proposal
+- [ ] Universal function for Jasmine's
+- [ ] Future plan
 
 ## Repo structure
 ```
