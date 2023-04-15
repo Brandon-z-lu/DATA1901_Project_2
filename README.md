@@ -2,6 +2,8 @@
 - [README **written by Brandon Lu**](#readme-written-by-brandon-lu)
   - [Final report](#final-report)
   - [TODO](#todo)
+  - [PEOPLE](#people)
+  - [Previous TODOs](#previous-todos)
       - [Long Lat](#long-lat)
       - [EXEC SUMMARY RN: (**Yvonne**)](#exec-summary-rn-yvonne)
       - [Re-categorization (Jasmine)](#re-categorization-jasmine)
@@ -35,6 +37,31 @@
 1. get the `suburb.txt`
 
 ## TODO
+- code for everything `.rmd`
+- csv folder for everything if you actually export them `.csv`
+- html knitted `.html`
+
+## PEOPLE
+- [ ] Gihansa: writing before Sun night
+  - [ ] Writing including the conclusion (no correlation) 350 words Sun night/noon. Sun night AT THE LATEST
+- [ ] Yvonne: script for videos: finished before Sun night
+  - [ ] 2 min * 160 words/min = 320 words
+  - [ ] 350 words limit? **Yvonne writing the script: more informal?** tmr night?? **YES**
+- [ ] Saki: after scripts and writing: ppt slides (preferrably before next Monday night)
+  - [ ] Presentation
+  - [ ] PPT slides: **Saki** Powerpoint slides right after Sunday night; I think preferrably by Monday; Applying the PPT template from Canva maybe I have no idea.
+- [ ] Byungjun: after videos: editing (preferrably before next Wed night)
+  - [ ] Byungjun video editing?
+  - [ ] Video clips *for each person*
+  - [ ] Speed it up / down
+- [ ] Brandon
+  - [ ] Coding
+    - [ ] Collaboration: 1 hr: Jasmine and Brandon (More suburbs)
+    - [ ] Finalizing all the suburbs
+
+
+## Previous TODOs
+
 - [X] Conclusion
 - [X] Starting writing transferrables
   - [X] Why we want to do this
@@ -280,4 +307,4 @@ The directory can be shown as below:
 
 ## Questions
 
-- [] Why `df_` and `l_`?
+- [ ] Why `df_` and `l_`?
