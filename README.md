@@ -1,6 +1,12 @@
 # README **written by Brandon Lu**
 - [README **written by Brandon Lu**](#readme-written-by-brandon-lu)
+  - [Final report](#final-report)
   - [TODO](#todo)
+      - [Long Lat](#long-lat)
+      - [EXEC SUMMARY RN: (**Yvonne**)](#exec-summary-rn-yvonne)
+      - [Re-categorization (Jasmine)](#re-categorization-jasmine)
+      - [Data website:](#data-website)
+      - [Limitaion:](#limitaion)
   - [Repo structure](#repo-structure)
   - [What's next?](#whats-next)
     - [Best case](#best-case)
@@ -24,12 +30,53 @@
     - [12:00 am](#1200-am)
   - [Questions](#questions)
 
+
+## Final report
+1. get the `suburb.txt`
+
 ## TODO
-- [ ] Starting writing transferrables
-- [ ] Jasmine's
-- [ ] Brandon's proposal
-- [ ] Universal function for Jasmine's
-- [ ] Future plan
+- [X] Conclusion
+- [X] Starting writing transferrables
+  - [X] Why we want to do this
+  - [X] Conclusion `finalized`
+  - [X] Too many suburbs
+    - [X] Not that many
+  - [X] Suburbs with little data
+- [X] Jasmine's
+- [X] Brandon's proposal
+- [X] Universal function for Jasmine's
+- [X] Future plan
+
+- 2046 for all suburbs
+- Auburn 675
+- Eastwood 191
+
+#### Long Lat
+- Jasmine: individual houses `geo-code` `geo-sphere`
+- Brandon: train station `manually` or `python`
+- Gihansa: major train stations!!! ONLY!!! **NULL RESULT!!!**
+- **Propose? Suppose that it doesn't make a difference?**
+- To reach a more solid solution: 
+  - incorporate `central` `town hall` `Wynyard`: big train stations make a diff
+  - Blacktown, dsalfjdsalsadlf, tweak to reach a more robust conclusion
+- Gihansa: reclassify??
+
+
+#### EXEC SUMMARY RN: (**Yvonne**)
+
+Based on our data analysis using 2046 data points from five different suburbs, we can conclude that the distance from a train station has a small but relatively insignificant effect on townhouse prices.Based on our data analysis using 2046 data points from five different suburbs, we can conclude that the distance from a train station has a small but relatively insignificant effect on townhouse prices.
+(33 words)
+
+#### Re-categorization (Jasmine)
+date time -> qual
+
+#### Data website:
+- train station: https://en.wikipedia.org/wiki/List_of_Sydney_Trains_railway_stations 
+- data from: https://www.auhouseprices.com/sold/list/NSW/
+- inspiration: https://embracingtherandom.com/r/web-scraping/rent-scraping/
+
+#### Limitaion:
+- from other suburbs (Jasmine)
 
 ## Repo structure
 ```
