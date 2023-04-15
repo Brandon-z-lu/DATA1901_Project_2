@@ -2,6 +2,7 @@
 - [README **written by Brandon Lu**](#readme-written-by-brandon-lu)
   - [Final report](#final-report)
   - [TODO](#todo)
+  - [Meeting](#meeting)
   - [PEOPLE](#people)
   - [Previous TODOs](#previous-todos)
       - [Long Lat](#long-lat)
@@ -41,12 +42,20 @@
 - csv folder for everything if you actually export them `.csv`
 - html knitted `.html`
 
+
+## Meeting
+- [ ] Meeting: tmr 10:00 am
+- [ ] 
+
 ## PEOPLE
+- [ ] **Incorporate numerical analysis alsoQ**
+
+
 - [ ] Gihansa: writing before Sun night
   - [ ] Writing including the conclusion (no correlation) 350 words Sun night/noon. Sun night AT THE LATEST
-- [ ] Yvonne: script for videos: finished before Sun night
+- [ ] (Yvonne: script for videos: finished before Sun night
   - [ ] 2 min * 160 words/min = 320 words
-  - [ ] 350 words limit? **Yvonne writing the script: more informal?** tmr night?? **YES**
+  - [ ] 350 words limit? **Yvonne writing the script: more informal?** tmr night?? **YES**)
 - [ ] Saki: after scripts and writing: ppt slides (preferrably before next Monday night)
   - [ ] Presentation
   - [ ] PPT slides: **Saki** Powerpoint slides right after Sunday night; I think preferrably by Monday; Applying the PPT template from Canva maybe I have no idea.
