@@ -243,5 +243,5 @@ export_all_suburbs <- function(file_name) {
 
 ## Export all
 ```{r}
-export_all_suburbs("suburbs.txt")
+export_all_suburbs("suburbs_main_export.txt")
 ```
