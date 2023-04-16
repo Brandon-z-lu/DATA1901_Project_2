@@ -1,0 +1,183 @@
+---
+title: "Data from Computer Version"
+output: html_document
+date: "2023-03-31"
+---
+```{r}
+library(tidygeocoder)
+library(tidyverse)
+library(broom)
+library(dplyr)
+library(rafalib)
+library(plotly)
+library(geosphere)
+setwd("~/DATA1901_Project_2")
+getwd()
+```
+
+```{r}
+# Reading the `csv` files
+l_parramatta_dist <- read.csv("csv_cache/l_2150_parramatta_houseprice.csv")
+l_merrylands_dist <- read.csv("csv_cache/l_2160_merrylands_houseprice.csv")
+l_eastwood_dist <- read.csv("csv_cache/l_2122_eastwood_houseprice.csv")
+l_auburn_dist <- read.csv("csv_cache/l_2144_auburn_houseprice.csv")
+l_granville_dist <- read.csv("csv_cache/l_2142_granville_houseprice.csv")
+
+# Categorize the data set `l_parramatta_dist` into different distance categories
+l_parramatta_dist$"distance_to_train_station(km)" <- l_parramatta_dist$distance_to_train_station/1000
+l_auburn_dist$"distance_to_train_station(km)" <- l_auburn_dist$distance_to_train_station/1000
+l_merrylands_dist$"distance_to_train_station(km)" <- l_merrylands_dist$distance_to_train_station/1000
+l_eastwood_dist$"distance_to_train_station(km)" <- l_eastwood_dist$distance_to_train_station/1000
+l_granville_dist$"distance_to_train_station(km)" <- l_granville_dist$distance_to_train_station/1000
+
+# Removing that `FIRST` row of previous `dist`
+l_parramatta_dist2 <- l_parramatta_dist[, -1]
+l_eastwood_dist2 <- l_eastwood_dist[, -1]
+l_merrylands_dist2 <-l_merrylands_dist[, -1]
+l_granville_dist2 <-l_granville_dist[, -1]
+l_auburn_dist2 <-l_auburn_dist[, -1]
+
+# # Writing the `csv` files into a new folder `Long Lat Dist Suburb Data`
+# write.csv(l_parramatta_dist2, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Long Lat Dist Suburb Data/l_parramatta_houseprice.csv", row.names=TRUE)
+# 
+# write.csv(l_merrylands_dist2, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Long Lat Dist Suburb Data/l_merrylands_houseprice.csv", row.names=TRUE)
+# 
+# write.csv(l_auburn_dist2, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Long Lat Dist Suburb Data/l_auburn_houseprice.csv", row.names=TRUE)
+# 
+# write.csv(l_eastwood_dist2, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Long Lat Dist Suburb Data/l_eastwood_houseprice.csv", row.names=TRUE)
+# 
+# write.csv(l_granville_dist2, "~/Desktop/UNI/1st Year/DATA1901 files/Project/Project 2/Long Lat Dist Suburb Data/l_granville_houseprice.csv", row.names=TRUE)
+```
+
+### Graphing (general plots but realised they don't show much trend, so tried to control for variables later)
+**Note that the operations above shouldn't affect the operations below as after all, the followin code is searching based on the `key` in a dictionary rather than based on an `index` in an array**
+```{r}
+ggplot(l_parramatta_dist, aes(x=distance_to_train_station, y=soldprice))+
+  geom_point(aes(color=bedroom))+
+  scale_colour_gradient(low="pink")+
+  labs(title = "Sale Price of Townhouses vs Distance to Train Station", x="Distance to Local Train Station (m)", y="Sale Price ($)")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme_linedraw()
+
+ggplot(l_merrylands_dist, aes(x=distance_to_train_station, y=soldprice))+
+  geom_point(aes(color=bedroom))+
+  scale_colour_gradient(low="blue")+
+  labs(title = "Sale Price of Townhouses vs Distance to Train Station", x="Distance to Local Train Station (m)", y="Sale Price ($)")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme_linedraw()
+
+ggplot(l_auburn_dist, aes(x=distance_to_train_station, y=soldprice))+
+  geom_point(aes(color=bedroom))+
+  scale_colour_gradient(low="red")+
+  labs(title = "Sale Price of Townhouses vs Distance to Train Station", x="Distance to Local Train Station (m)", y="Sale Price ($)")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme_linedraw()
+
+ggplot(l_eastwood_dist, aes(x=distance_to_train_station, y=soldprice))+
+  geom_point(aes(color=bedroom))+
+  scale_colour_gradient(low="grey")+
+  labs(title = "Sale Price of Townhouses vs Distance to Train Station", x="Distance to Local Train Station (m)", y="Sale Price ($)")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme_linedraw()
+
+ggplot(l_granville_dist, aes(x=distance_to_train_station, y=soldprice))+
+  geom_point(aes(color=factor(bedroom)))+
+  labs(title = "Sale Price of Townhouses vs Distance to Train Station", x="Distance to Local Train Station (m)", y="Sale Price ($)")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme_linedraw()
+
+ggplot(l_granville_dist, aes(x=distance_to_train_station, y=soldprice))+
+  geom_point(aes(color=factor(bedroom)))+
+  labs(title = "Sale Price of Townhouses vs Distance to Train Station", x="Distance to Local Train Station (m)", y="Sale Price ($)")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme_linedraw()
+```
+
+
+```{r}
+ggplot(l_eastwood_dist, aes(x=bedroom[bedroom=1], y=soldprice))+
+  geom_boxplot()+
+  labs(title = "Sale Price of Townhouses vs No. of Bedrooms", x="No. of Bedrooms", y="Sale Price ($)")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme_linedraw()
+
+ggplot(l_eastwood_dist, aes(x=factor(bedroom), y=soldprice))+
+  geom_boxplot()+
+  labs(title = "Sale Price of Townhouses vs No. of Bedrooms", x="No. of Bedrooms", y="Sale Price ($)")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme_linedraw()
+```
+
+### Splitting by no. of rooms
+```{r}
+parramatta_1bed <- filter(l_parramatta_dist, bedroom == 1, carspace == 1)
+parramatta_2bed <- filter(l_parramatta_dist, bedroom == 2, carspace == 1)
+parramatta_3bed <- filter(l_parramatta_dist, bedroom == 3)
+
+par(mfrow=c(1,2))
+ggplot(parramatta_1bed, aes(x = distance_to_train_station, y = soldprice/100000)) +
+  geom_boxplot() +
+  labs(title = "Sold price for 1-bedroom properties", x="Distance from Train Station(m)", y="Selling Price (x$100000)")+
+  theme_bw()
+
+ggplot(parramatta_2bed, aes(x = distance_to_train_station, y = soldprice/100000)) +
+  geom_boxplot() +
+  labs(title = "Sold price for 2-bedroom properties", x="Distance from Train Station(m)", y="Selling Price (x$100000)")+
+  theme_bw()
+
+ggplot(parramatta_3bed, aes(x = distance_to_train_station, y = soldprice/100000)) +
+  geom_boxplot() +
+  labs(title = "Sold price for 3-bedroom properties", x="Distance from Train Station(m)", y="Selling Price (x$100000)")+
+  theme_bw()
+
+```
+
+## Classing distance (This section was for parramatta specifically, if you want to keep this graphical representation, then the same code can be used for all other suburbs too)
+```{r}
+l_parramatta_dist$distance_class <- cut(l_parramatta_dist$"distance_to_train_station(km)",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500,3.000,3.250,3.500,3.750, 4.000))
+l_merrylands_dist$distance_class <- cut(l_merrylands_dist$"distance_to_train_station(km)",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500, 3.000,3.250,3.500,3.750, 4.000))
+l_auburn_dist$distance_class <- cut(l_auburn_dist$"distance_to_train_station(km)",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500,3.000,3.250,3.500,3.750, 4.000))
+l_eastwood_dist$distance_class <- cut(l_eastwood_dist$"distance_to_train_station(km)",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500,3.000,3.250,3.500,3.750, 4.000))
+l_granville_dist$distance_class <- cut(l_granville_dist$"distance_to_train_station(km)",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500,3.000,3.250,3.500,3.750, 4.000))
+
+ggplot(l_parramatta_dist, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot() +
+  labs(title = "Sold price for -bedroom properties", x="Distance from Train Station(m)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+
+
+parramatta_2bed <- filter(l_parramatta_dist, bedroom == 2, carspace == 1)
+parramatta_2bed$distance_class <- cut(parramatta_2bed$"distance_to_train_station(km)",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500))
+
+# for 2 bedrooms, this is the boxplots after classing them by distance 
+ggplot(parramatta_2bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot() +
+  labs(title = "Sold price for -bedroom properties", x="Distance from Train Station(m)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+
+summary(parramatta_2bed)
+```
+
+# combining all data 
+```{r}
+# combined data for all numbers of bedrooms
+combined_df <-rbind(l_parramatta_dist, l_merrylands_dist, l_auburn_dist, l_granville_dist, l_granville_dist)
+ggplot(combined_df, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot() +
+  labs(title = "Sold Price vs Distance from Train Station", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+
+
+# combined data for 2 bedrooms, we can do this for 3 bedrooms as well if you'd like
+combined_df_2bed <-filter(combined_df, bedroom ==2, carspace == 1)
+ggplot(combined_df_2bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot() +
+  labs(title = "Sold Price vs Distance from Train Station", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+```
+
+
