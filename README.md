@@ -1,6 +1,6 @@
 # README **written by Brandon Lu**
 - [README **written by Brandon Lu**](#readme-written-by-brandon-lu)
-  - [Final report](#final-report)
+  - [What I've done this morning Apr 16](#what-ive-done-this-morning-apr-16)
   - [TODO](#todo)
   - [Meeting](#meeting)
   - [PEOPLE](#people)
@@ -34,8 +34,13 @@
   - [Questions](#questions)
 
 
-## Final report
-1. get the `suburb.txt`
+## What I've done this morning Apr 16
+- [X] Checking whether my method is valid **10:00 am 10 min**
+  - ![uPic_2023Y-04M-16D_09H-59MIN-56S_PZLQ80](https://raw.githubusercontent.com/Brandon-Lu737/Shared_Public_Pic_Hosting/master/uPic_2023Y-04M-16D_09H-59MIN-56S_PZLQ80.png)
+  - IT IS! AS YOU CAN SEE OFF BY 10 METERES AT MOST FOR MOST OF THE TIME. NEGLIGIBLE.
+  - So my method of mass producing data is insanely accurate, or at least as accurate as human-made data
+  - I would recommend completely adopt my csv files and ignore the csv files generated through previous methods *to maintain the consistency throughout*.
+- [ ] Make sure that my program is compatible with Jasmine's
 
 ## TODO
 - code for everything `.rmd`
