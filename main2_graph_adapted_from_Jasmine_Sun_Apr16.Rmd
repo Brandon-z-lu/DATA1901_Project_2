@@ -23,41 +23,30 @@ getwd()
 
 ### Reading in files
 ```{r}
-# Reading the `csv` files
-l_parramatta_distance <- read.csv("csv_cache/l_2150_parramatta_houseprice.csv")
-l_merrylands_distance <- read.csv("csv_cache/l_2160_merrylands_houseprice.csv")
-l_eastwood_distance <- read.csv("csv_cache/l_2122_eastwood_houseprice.csv")
-# l_auburn_distance <- read.csv("csv_cache/l_2144_auburn_houseprice.csv")
-l_granville_distance <- read.csv("csv_cache/l_2142_granville_houseprice.csv")
+# Get the list of CSV files in the 'csv_cache' directory
+csv_files <- list.files(path = "csv_cache", pattern = "*.csv", full.names = TRUE)
 
-# Categorize the data set `l_parramatta_dist` into different distance categories
-l_parramatta_distance$"distance_to_train_station(km)" <- l_parramatta_distance$distance_to_train_station/1000
-# l_auburn_distance$"distance_to_train_station(km)" <- l_auburn_dist$distance_to_train_station/1000
-l_merrylands_distance$"distance_to_train_station(km)" <- l_merrylands_distance$distance_to_train_station/1000
-l_eastwood_distance$"distance_to_train_station(km)" <- l_eastwood_distance$distance_to_train_station/1000
-l_granville_distance$"distance_to_train_station(km)" <- l_granville_distance$distance_to_train_station/1000
+# Initialize an empty data frame to store the combined data
+combined_df <- data.frame()
 
-# # Removing that `FIRST` row of previous `dist`
-# l_parramatta_dist2 <- l_parramatta_distance[, -1]
-# l_eastwood_dist2 <- l_eastwood_distance[, -1]
-# l_merrylands_dist2 <-l_merrylands_distance[, -1]
-# l_granville_dist2 <-l_granville_distance[, -1]
-# # l_auburn_dist2 <-l_auburn_dist[, -1]
-```
+# Loop through each file in the csv_files list
+for (file in csv_files) {
+  # Read the CSV file
+  location_data <- read.csv(file)
+  
+  # Categorize distance
+  location_data$"distance_to_train_station(km)" <- location_data$distance_to_train_station / 1000
+  
+  # Classing distance
+  location_data$distance_class <- cut(location_data$"distance_to_train_station(km)",
+                                      breaks = c(0, 0.250, 0.500, 0.750, 1.000, 1.250, 1.500, 1.750, 2.000, 2.250, 2.500, 3.000, 3.250, 3.500, 3.750, 4.000))
+  
+  # Combine the processed data frame with the combined_df data frame
+  combined_df <- rbind(combined_df, location_data)
+}
 
-
-### Classing distance
-```{r}
-l_parramatta_distance$distance_class <- cut(l_parramatta_distance$"distance_to_train_station(km)",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500,3.000,3.250,3.500,3.750, 4.000))
-l_merrylands_distance$distance_class <- cut(l_merrylands_distance$"distance_to_train_station(km)",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500, 3.000,3.250,3.500,3.750, 4.000))
-# l_auburn_distance$distance_class <- cut(l_auburn_distance$"distance_to_train_station(km)",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500,3.000,3.250,3.500,3.750, 4.000))
-l_eastwood_distance$distance_class <- cut(l_eastwood_distance$"distance_to_train_station(km)",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500,3.000,3.250,3.500,3.750, 4.000))
-l_granville_distance$distance_class <- cut(l_granville_distance$"distance_to_train_station(km)",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500,3.000,3.250,3.500,3.750, 4.000))
-```
-
-### Combining Data
-```{r}
-combined_df <-rbind(l_parramatta_distance, l_merrylands_distance, l_eastwood_distance, l_granville_distance)
+# Inspect the combined data frame
+head(combined_df)
 ```
 
 ### Filtering Data
