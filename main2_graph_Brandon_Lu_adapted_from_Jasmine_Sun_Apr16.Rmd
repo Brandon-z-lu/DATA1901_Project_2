@@ -24,7 +24,7 @@ getwd()
 ### Reading in files
 ```{r}
 # Get the list of CSV files in the 'csv_cache' directory
-csv_files <- list.files(path = "csv_cache", pattern = "*.csv", full.names = TRUE)
+csv_files <- list.files(path = "main2_graph_Brandon_Lu_adapted_from_Jasmine_Sun_Apr16_INPUT", pattern = "*.csv", full.names = TRUE)
 
 # Initialize an empty data frame to store the combined data
 combined_df <- data.frame()
