@@ -40,7 +40,10 @@
   - IT IS! AS YOU CAN SEE OFF BY 10 METERES AT MOST FOR MOST OF THE TIME. NEGLIGIBLE.
   - So my method of mass producing data is insanely accurate, or at least as accurate as human-made data
   - I would recommend completely adopt my csv files and ignore the csv files generated through previous methods *to maintain the consistency throughout*.
-- [ ] Make sure that my program is compatible with Jasmine's
+- [X] Make sure that my program is compatible with Jasmine's 10:40 am
+  - A major problem. @Jasmine Gu you’ve changed the unit of measure for distance. I think I’ll be almost impossible to change mine. So I’ve decided to do all the changes and adding all the distance class after exporting. Otherwise it’ll take an extra 6 hours to get things done
+  - And there seems to be an incongruence with the distance_to_train_station name. The round brackets just disappeared. I’m fixing it
+  - @Jasmine Gu After a lot of debugging my code is finally compatible. Now I’m writing the loop
 
 ## TODO
 - code for everything `.rmd`
