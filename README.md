@@ -87,7 +87,7 @@ Just copy this into your `suburbs_main_export_Brandon_Lu.txt` and run all the co
 
 ### FAQ with scraping data
 #### 1. The code is running slow:
-You're stuck with it unfortunately. It can take at least 8 hours depending on your internet speed. Which is why you only want to use `csv/cache`.
+You're stuck with it unfortunately. It can take at least 8 hours depending on your internet speed and your CPU power. Even after downloading, combining the data takes a lot of CPU power. Which is why you only want to use `csv/cache`.
 #### 2. Where did the csv go?
 `csv_cache/`
 #### 3. Why weren't some suburbs not showing?
