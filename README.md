@@ -1,5 +1,17 @@
 # README **written by Brandon Lu**
 - [README **written by Brandon Lu**](#readme-written-by-brandon-lu)
+  - [Instruction Apr 17 Monday:](#instruction-apr-17-monday)
+    - [For abbreviation:](#for-abbreviation)
+    - [Walkthrough](#walkthrough)
+      - [To scrape data: export `csv`  `main2.rmd`](#to-scrape-data-export-csv--main2rmd)
+    - [FAQ with scraping data](#faq-with-scraping-data)
+      - [1. The code is running slow:](#1-the-code-is-running-slow)
+      - [2. Where did the csv go?](#2-where-did-the-csv-go)
+      - [3. Why weren't some suburbs not showing?](#3-why-werent-some-suburbs-not-showing)
+    - [2. Analyzing the data: using `main2.rmd`](#2-analyzing-the-data-using-main2rmd)
+    - [FAQ for analysis 2. `main2.rmd`](#faq-for-analysis-2-main2rmd)
+      - [1. I lost all my data? Did I mess up with Github?](#1-i-lost-all-my-data-did-i-mess-up-with-github)
+      - [2. How should I single out a specific suburb?](#2-how-should-i-single-out-a-specific-suburb)
   - [What I've done this morning Apr 16](#what-ive-done-this-morning-apr-16)
   - [TODO](#todo)
   - [Meeting](#meeting)
@@ -10,11 +22,6 @@
       - [Re-categorization (Jasmine)](#re-categorization-jasmine)
       - [Data website:](#data-website)
       - [Limitaion:](#limitaion)
-  - [Repo structure](#repo-structure)
-  - [What's next?](#whats-next)
-    - [Best case](#best-case)
-        - [This will be left to ALL GROUP MEMBERS; I think it's best for all of us to think about what we can do with all this data](#this-will-be-left-to-all-group-members-i-think-its-best-for-all-of-us-to-think-about-what-we-can-do-with-all-this-data)
-    - [Worst case](#worst-case)
   - [Apr 12: log](#apr-12-log)
   - [Apr 12: tomorrow plan](#apr-12-tomorrow-plan)
   - [From Apr 11, 2023: 'Add `min_work_ex-before_graph.rmd` and successfully run for two suburbs; Add list; De-clutter the code; Reset the `0_sat`'](#from-apr-11-2023-add-min_work_ex-before_graphrmd-and-successfully-run-for-two-suburbs-add-list-de-clutter-the-code-reset-the-0_sat)
@@ -32,6 +39,85 @@
     - [11:00 pm](#1100-pm)
     - [12:00 am](#1200-am)
   - [Questions](#questions)
+
+## Instruction Apr 17 Monday:
+### For abbreviation:
+`main1.rmd = main1_Brandon_Lu_before_graph_export.rmd`
+
+`main2.rmd = main2_graph_Brandon_Lu_adapted_from_Jasmine_Sun_Apr16.Rmd`
+
+`main2 folder = main2_graph_Brandon_Lu_adapted_from_Jasmine_Sun_Apr16_INPUT`
+
+### Walkthrough
+#### To scrape data: export `csv`  `main2.rmd`
+You first load the data in `suburbs_main_export_Brandon_Lu.txt`:
+
+```
+...
+2216/Rockdale/, -33.9522623, 151.1367137
+2766/Rooty Hill/, -33.771561, 150.8451541
+2069/Roseville/, -33.784186, 151.1772762
+2762/Schofields/, -33.7046401, 150.8738676
+2147/Seven Hills/, -33.7743033, 150.9361487
+2000/St James/, -33.8706764, 151.2104527
+2065/St Leonards/, -33.822247, 151.194107
+2760/St Marys/, -33.762096, 150.775146
+2044/St Peters/, -33.9074961, 151.180357
+... and so on
+```
+This means that the `main1.rmd` will go through all entries of this file and export the `csv`.
+
+You can get the full list of Sydney suburbs from `get_suburbs_Brandon_Ludata/Sydney_suburb_list_complete.txt`. Sample file is this:
+```
+2220/Allawah/, -33.9696853, 151.1145196
+2205/Arncliffe/, -33.9362525, 151.1472815
+2064/Artarmon/, -33.80883110000001, 151.1851236
+2131/Ashfield/, -33.88763, 151.1259
+2077/Asquith/, -33.6886887, 151.1081727
+2144/Auburn/, -33.8491889, 151.0328916
+2216/Banksia/, -33.9453067, 151.1404131
+2200/Bankstown/, -33.917892, 151.034653
+...
+2000/Wynyard/, -33.8657055, 151.2061744
+2199/Yagoona/, -33.9069723, 151.0244857
+2161/Yennora/, -33.8647428, 150.9707794
+```
+
+Just copy this into your `suburbs_main_export_Brandon_Lu.txt` and run all the code blocks in `main1.rmd`.
+
+### FAQ with scraping data
+#### 1. The code is running slow:
+You're stuck with it unfortunately. It can take at least 8 hours depending on your internet speed. Which is why you only want to use `csv/cache`.
+#### 2. Where did the csv go?
+`csv_cache/`
+#### 3. Why weren't some suburbs not showing?
+Because of system and website limitations. You may need to scrape it by yourself. 
+
+A kind reminder that: `main_before_graph_export_log/main_before_graph_export_log.txt` shows all the suburbs not being able to be generated in a particular instance.
+
+### 2. Analyzing the data: using `main2.rmd`
+First, all your inputs come from the folder `main2_graph_Brandon_Lu_adapted_from_Jasmine_Sun_Apr16_INPUT` which is what we call the `main2_INPUT/` folder.
+
+Then, you can see a lot of `csv`s. YOU SHOULD ONLY INCLUDE THE SUBURBS YOU WANT IN THIS FOLDER!
+Because the `main2.rmd` will read ALL of it.
+
+If you want to modify the `main2_INPUT/` folder, head to `csv_cache` which contains all the `csv` files. Just copy one to the `main2_INPUT/` folder and run the `main2.rmd` again.
+
+### FAQ for analysis 2. `main2.rmd`
+#### 1. I lost all my data? Did I mess up with Github?
+Messing up with Github needs write access. You don't have write access. Think of GitHub as a google drive. Your local files doesn't affect the files on the cloud.
+
+Download a fresh copy from https://github.com/Brandon-Lu737/DATA1901_Project_2. Click `code` then `download zip`.
+
+![uPic_2023Y-04M-17D_18H-40MIN-34S_ScSrdg](https://raw.githubusercontent.com/Brandon-Lu737/Shared_Public_Pic_Hosting/master/uPic_2023Y-04M-17D_18H-40MIN-34S_ScSrdg.png)
+
+#### 2. How should I single out a specific suburb?
+The code for analysis is mostly written by Jasmine. Ask her for any advice on that.
+
+I'll (Brandon) be responsible for handling the backbone infrastructure of our project.
+
+
+
 
 
 ## What I've done this morning Apr 16
@@ -121,51 +207,6 @@ date time -> qual
 
 #### Limitaion:
 - from other suburbs (Jasmine)
-
-## Repo structure
-```
-.
-├── Jasmine_files // Archived
-├── README.md
-
-├── csv_cache 
-// Exported data: exported from `min_working_example-before_graph_analysis_Apr12.rmd`
-// to be imported into `min_working_example-graph_adapted_from_Jasmine-Apr12_Apr12.Rmd`
-
-├── df_files // Archived dependencies for `Jasmine_files`
-
-├── get_suburbs.py 
-// Input: a list of suburb; 
-// Output: a list of suburb along with the postcode and geometric coordination
-
-├── get_suburbs_by_areas.py // Archived
-├── get_suburbs_by_areas_data
-
-├── get_suburbs_data // Output data for `get_suburbs_data.py`
-
-├── get_train_station_names.py 
-├── get_train_station_names_data
-// Get all the train stations from the wikipedia link:
-// url = "https://en.wikipedia.org/wiki/List_of_Sydney_Trains_railway_stations"
-
-├── l_files // Archived
-
-├── min_working_example-before_graph_analysis_Apr12.html
-├── min_working_example-before_graph_analysis_Apr12.rmd
-├── min_working_example-graph_adapted_from_Jasmine-Apr12_Apr12.Rmd
-├── min_working_example-graph_adapted_from_Jasmine-Apr12_Apr12.html
-
-└── suburbs.txt // Input for `min_working_example-before_graph_analysis_Apr12.rmd`
-```
-
-## What's next?
-### Best case
-- [x] Validate the automatic `py` scraping program
-- [x] Generate all files available in the `csv` format
-##### This will be left to ALL GROUP MEMBERS; I think it's best for all of us to think about what we can do with all this data
-- [x] Write new prgrams for all these files and figure out how we can have at least an insight
-### Worst case
-- [x] Can @Jasmine send your `last resort file` to me so that I can upload it to all people to see?
 
 ## Apr 12: log
 
@@ -275,37 +316,6 @@ setwd("..")
 getwd()
 
 l_parramatta_dist <- read.csv("l_files/l_parramatta_houseprice.csv")
-```
-
-The directory can be shown as below:
-```
-~/Uni-Code/4_DATA1901_RStudio/Project2  ‹my-branch*› 
-╰─➤  tree
-.
-├── Brandon_Lu_stat_rep.md
-├── Jasmine_self_test_sat_night.Rmd
-├── Jasmine_self_test_sat_night.html
-├── Project2_1901_v0.Rmd
-├── SelfTest_from_tutorial_Project2.html
-├── SelfTest_from_tutorial_Project2.rmd
-├── df_files
-│   ├── df_eastwood_houseprice.csv
-│   ├── df_granville_houseprice.csv
-│   ├── df_marrickville_houseprice.csv
-│   ├── df_merrylands_houseprice.csv
-│   ├── df_parramatta_houseprice.csv
-│   └── df_strathfield_houseprice.csv
-├── l_files
-│   ├── l_auburn_houseprice.csv
-│   ├── l_eastwood_houseprice.csv
-│   ├── l_granville_houseprice.csv
-│   ├── l_merrylands_houseprice.csv
-│   └── l_parramatta_houseprice.csv
-├── test_code.rmd
-├── test_read_csv_before.html
-└── test_read_csv_before.rmd
-
-3 directories, 20 files
 ```
 
 ### 10:00 pm
