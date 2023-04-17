@@ -20,11 +20,11 @@ get_df_suburb <- function(location = "2151/Parramatta/"){
   # determine how many pages to scroll through 
   tryCatch({
     location <- gsub("\\s+", "+", location)
-    print(location)
+    # print(location)
     url <- paste0("https://www.auhouseprices.com/sold/list/NSW/", 
                   location, 
                   "1/?type=townhouse&ymin=0&ymax=0&bmin=0&bmax=0&pmin=0&pmax=0&sort=date&kw=") # type set to townhouse, no other filtering
-    print(url)
+    # print(url)
     webpage <- read_html(url)
     
     # get the number of properties and the number of property displayed on each page 
@@ -35,14 +35,14 @@ get_df_suburb <- function(location = "2151/Parramatta/"){
     
     df <- NULL
     
-    print(paste0(location, ": begins 0/4"))
-    print(paste0( "Current suburb: ", location) )
-    print(paste0( "Total pages ", end_page) )
+    # print(paste0(location, ": begins 0/4"))
+    # print(paste0( "Current suburb: ", location) )
+    # print(paste0( "Total pages ", end_page) )
     
     for (this_page in c(1:end_page)){
-    # print(paste0( "Processing page ", this_page) )
+    # # print(paste0( "Processing page ", this_page) )
     if (this_page %% 5 == 0){
-      print(paste0("Page processed: ", this_page, "/", end_page))
+      # print(paste0("Page processed: ", this_page, "/", end_page))
     }
     
     # get website text
@@ -115,8 +115,8 @@ get_df_suburb <- function(location = "2151/Parramatta/"){
   # move the "index" column to the front of the data frame
   df <- df[, c("House_ID", names(df)[-ncol(df)])]
   
-  print(paste0("Page processed: ", this_page, "/", end_page))
-  print(paste0(location, ": 1/4: get_df_suburb: creating data frame done!"))
+  # print(paste0("Page processed: ", this_page, "/", end_page))
+  # print(paste0(location, ": 1/4: get_df_suburb: creating data frame done!"))
   return(df)
   }, error = function(e) {
     # Error handling code
@@ -144,12 +144,12 @@ add_distance_between <- function(lat, lon, fixed_lat, fixed_lon) {
 
 get_l_suburb_dist <- function(df_suburb, suburb_lat, suburb_lon, location) {
   l_suburb <- df_suburb %>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
-  print(paste0(location, ": 2/4: get_l_suburb: done!"))
+  # print(paste0(location, ": 2/4: get_l_suburb: done!"))
   l_suburb_dist <- data.frame(
     l_suburb, distance_to_train_station = apply(
       l_suburb[,c("latitude","longitude")], 1, function(x) add_distance_between(x[1], x[2], suburb_lat, suburb_lon))
   )
-  print(paste0(location, ": 3/4: get_l_suburb_dist: done!"))
+  # print(paste0(location, ": 3/4: get_l_suburb_dist: done!"))
   return(l_suburb_dist)
 }
 
@@ -160,10 +160,10 @@ export_l_suburb_dist_csv <- function(location, l_suburb_dist) {
     dir.create("csv_cache")  # create directory if it doesn't exist
   }
   file_name <- paste0("l_", gsub("/", "_", location), "houseprice.csv")
-  print(file_name)
+  # print(file_name)
   file_path <- file.path("csv_cache", file_name)  # specify file path
   write.csv(l_suburb_dist, file_path, row.names = FALSE)  # export as CSV file
-  print(paste0(location, ": 4/4: export_l_suburb_dist_csv: done!"))
+  # print(paste0(location, ": 4/4: export_l_suburb_dist_csv: done!"))
   return("Result: csv export finished")
 }
 
@@ -178,30 +178,7 @@ export_a_suburb <- function(location, suburb_lat, suburb_lon) {
   
   l_suburb_dist <- get_l_suburb_dist(df_suburb, suburb_lat, suburb_lon, location)
   export_l_suburb_dist_csv(location, l_suburb_dist)
-  print(paste0(location, ": Finish csv export"))
-}
-
-
-export_all_suburbs_parallel <- function(file_name, num_cores = detectCores()) {
-  # Read the input file
-  suburbs_input <- read.table(file_name, header = FALSE, sep = ",", col.names = c("location", "latitude", "longitude"), strip.white = TRUE, comment.char = "", quote = "")
-  
-  # Filter out rows starting with a '#' character
-  suburbs_input <- suburbs_input[!grepl("^#", suburbs_input$location), ]
-  
-  # Function to process a single suburb (used by mclapply)
-  process_suburb <- function(i) {
-    location <- as.character(suburbs_input[i, "location"])
-    latitude <- as.numeric(suburbs_input[i, "latitude"])
-    longitude <- as.numeric(suburbs_input[i, "longitude"])
-    
-    export_a_suburb(location, latitude, longitude)
-  }
-  
-  # Process the suburbs in parallel using mclapply
-  mclapply(1:nrow(suburbs_input), process_suburb, mc.cores = num_cores)
-  
-  return(NULL)
+  # print(paste0(location, ": Finish csv export"))
 }
 
 
@@ -232,6 +209,12 @@ export_all_suburbs <- function(file_name) {
     longitude <- as.numeric(suburbs_input[i, "longitude"])
     
     export_a_suburb(location, latitude, longitude)
+    
+    # Print progress bar
+    progress <- i / nrow(suburbs_input)
+    num_hashes <- floor(progress * 100 / 2) # Assuming each '#' represents 2% of the progress
+    num_spaces <- 50 - num_hashes # Assuming the progress bar has 50 characters in total
+    cat(sprintf("#%s%s (%.0f%%)\n", paste(rep("#", num_hashes), collapse = ""), paste(rep(" ", num_spaces), collapse = ""), progress * 100))
   }
   
   return(NULL)
