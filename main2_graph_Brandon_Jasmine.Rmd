@@ -15,9 +15,6 @@ library(geosphere)
 
 library(rvest)
 library(lubridate)
-
-setwd("~/DATA1901_Project_2")
-getwd()
 ```
 
 

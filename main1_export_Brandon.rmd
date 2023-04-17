@@ -1,4 +1,4 @@
-## Setup
+# Setup
 ```{r, echo=F, message=F}
 library(tidygeocoder)
 library(tidyverse)
@@ -10,11 +10,9 @@ library(rvest)
 library(lubridate)
 library(geosphere)
 library(parallel)
-setwd("~/DATA1901_Project_2")
-getwd()
 ```
 
-## Six basic functions:
+# Six basic functions:
 ```{r}
 # House scraping: get_df_suburb
 get_df_suburb <- function(location = "2151/Parramatta/"){
@@ -123,8 +121,8 @@ get_df_suburb <- function(location = "2151/Parramatta/"){
   }, error = function(e) {
     # Error handling code
     # Set the file path and name
-    file_path <- "main1_export_log/"
-    file_name <- "main1_export_log.txt"
+    file_path <- "main1_export_Brandon_log/"
+    file_name <- "main1_export_Brandon_log.txt"
     
     # Create the directory if it doesn't exist
     if(!dir.exists(file_path)){
@@ -209,8 +207,8 @@ export_all_suburbs_parallel <- function(file_name, num_cores = detectCores()) {
 
 clear_log <- function() {
   # Set the file path and name
-  file_path <- "main_before_graph_export_log/"
-  file_name <- "main_before_graph_export_log.txt"
+  file_path <- "main1_export_Brandon_log"
+  file_name <- "main1_export_Brandon_log.txt"
   
   # Remove the file
   file.remove(file.path(file_path, file_name))
@@ -241,7 +239,7 @@ export_all_suburbs <- function(file_name) {
 ```
 
 
-## Export all
+# Export all
 ```{r}
 export_all_suburbs("main1_INPUT.txt")
 ```
