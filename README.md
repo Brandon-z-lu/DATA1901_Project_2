@@ -42,6 +42,9 @@
 
 ## Instruction Apr 17 Monday:
 ### For abbreviation:
+
+**Note that the folder structure has changed. If you need help just drop a message for Brandon.**
+
 `main1.rmd = main1_Brandon_Lu_before_graph_export.rmd`
 
 `main2.rmd = main2_graph_Brandon_Lu_adapted_from_Jasmine_Sun_Apr16.Rmd`
