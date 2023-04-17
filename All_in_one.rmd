@@ -156,9 +156,6 @@ get_l_suburb_dist <- function(df_suburb, suburb_lat, suburb_lon, location) {
 
 export_l_suburb_dist_csv <- function(location, l_suburb_dist) {
   # Writing the `l_granville_houseprice.csv` file in "~/csv_cache/"
-  if (!dir.exists("~/csv_cache")) {
-    dir.create("csv_cache")  # create directory if it doesn't exist
-  }
   file_name <- paste0("l_", gsub("/", "_", location), "houseprice.csv")
   # print(file_name)
   file_path <- file.path("csv_cache", file_name)  # specify file path
@@ -187,14 +184,22 @@ clear_log <- function() {
   file_path <- "main1_export_Brandon_log"
   file_name <- "main1_export_Brandon_log.txt"
   
-  # Remove the file
-  file.remove(file.path(file_path, file_name))
+  # Check if file exists before removing it
+  if (file.exists(file.path(file_path, file_name))) {
+    file.remove(file.path(file_path, file_name))
+  }
 }
 
 
+# Modified export_all_suburbs function with progress bar
 export_all_suburbs <- function(file_name) {
+  cat("Exporting into csv_cache/ begins:\n")
   # Clear the log
   a <- clear_log()
+  # create directory if it doesn't exist
+  if (!dir.exists("~/csv_cache")) {
+  dir.create("csv_cache")  
+  }
 
   # Read the input file
   suburbs_input <- read.table(file_name, header = FALSE, sep = ",", col.names = c("location", "latitude", "longitude"), strip.white = TRUE, comment.char = "", quote = "")
@@ -214,11 +219,13 @@ export_all_suburbs <- function(file_name) {
     progress <- i / nrow(suburbs_input)
     num_hashes <- floor(progress * 100 / 2) # Assuming each '#' represents 2% of the progress
     num_spaces <- 50 - num_hashes # Assuming the progress bar has 50 characters in total
+    cat("\n")
     cat(sprintf("#%s%s (%.0f%%)\n", paste(rep("#", num_hashes), collapse = ""), paste(rep(" ", num_spaces), collapse = ""), progress * 100))
   }
   
   return(NULL)
 }
+
 ```
 
 
