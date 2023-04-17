@@ -95,6 +95,24 @@ Because of system and website limitations. You may need to scrape it by yourself
 
 A kind reminder that: `main_before_graph_export_log/main_before_graph_export_log.txt` shows all the suburbs not being able to be generated in a particular instance.
 
+Summary of Jasmine's voice msg 1:
+do we need to mention
+- not analyzing outliers as a limitation?
+Brandon's response:
+I don't think so, since our client isn't mega-rich or mega-poor. We're just serving our clients. Outliers are called outliers for a reason because they don't fit in the data trend.
+
+Jasmine's voice msg 2:
+Di doesn't think outliers should be removed?
+Branodn's:
+In this case IDK
+
+Jasmine's voice msg 3:
+residual plot shape? Can you do it?
+Brandon's:
+Mmmm, I may have to refresh my memory about the lecture slides
+
+Jasmine's voice msg 4 and so on: summary ommited.
+
 ### 2. Analyzing the data: using `main2.rmd`
 First, all your inputs come from the folder `main2_graph_Brandon_Lu_adapted_from_Jasmine_Sun_Apr16_INPUT` which is what we call the `main2_INPUT/` folder.
 

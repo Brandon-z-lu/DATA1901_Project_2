@@ -1,0 +1,502 @@
+---
+title: "Decluttering of OG file"
+output: html_document
+date: "2023-04-13"
+---
+### Loading libraries
+```{r, echo=F, message=F}
+library(tidygeocoder)
+library(tidyverse)
+library(broom)
+library(dplyr)
+library(rafalib)
+library(plotly)
+library(geosphere)
+
+library(rvest)
+library(lubridate)
+
+setwd("~/DATA1901_Project_2")
+getwd()
+```
+
+
+### Reading in files
+```{r}
+# Get the list of CSV files in the 'csv_cache' directory
+csv_files <- list.files(path = "main2_INPUT", pattern = "*.csv", full.names = TRUE)
+
+# Initialize an empty data frame to store the combined data
+combined_df <- data.frame()
+
+# Loop through each file in the csv_files list
+for (file in csv_files) {
+  # Read the CSV file
+  location_data <- read.csv(file)
+  
+  # Categorize distance
+  location_data$"distance_to_train_station(km)" <- location_data$distance_to_train_station / 1000
+  
+  # Classing distance
+  location_data$distance_class <- cut(location_data$"distance_to_train_station(km)",
+                                      breaks = c(0, 0.250, 0.500, 0.750, 1.000, 1.250, 1.500, 1.750, 2.000, 2.250, 2.500, 3.000, 3.250, 3.500, 3.750, 4.000))
+  
+  # Combine the processed data frame with the combined_df data frame
+  combined_df <- rbind(combined_df, location_data)
+}
+
+# Inspect the combined data frame
+head(combined_df)
+```
+
+### Filtering Data
+```{r}
+combined_df_1bed <-filter(combined_df, bedroom ==1)
+combined_df_2bed <-filter(combined_df, bedroom ==2)
+combined_df_3bed <-filter(combined_df, bedroom ==3)
+combined_df_4bed <-filter(combined_df, bedroom ==4)
+combined_df_5bed <-filter(combined_df, bedroom ==5)
+```
+
+
+```{r}
+par(mfrow=c(1,2))
+ggplot(combined_df_1bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 1 Bedroom", x="Distance from Train Station(km)", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.25))
+
+ggplot(combined_df_1bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5, aes(fill=factor(carspace))) +
+  labs(title = "Sold Price vs Distance from Train Station for 1 Bedroom", x="Distance from Train Station(km)", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.25))
+```
+
+```{r}
+ggplot(combined_df_2bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 2 Bedrooms", x="Distance from Train Station(km)", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.25))
+summary(combined_df_2bed$soldprice)
+
+ggplot(combined_df_2bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5, aes(fill=factor(carspace))) +
+  labs(title = "Sold Price vs Distance from Train Station for 2 Bedrooms", x="Distance from Train Station(km)", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.25))
+summary(combined_df_2bed$soldprice)
+```
+
+```{r}
+ggplot(combined_df_3bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 3 Bedrooms", x="Distance from Train Station(km)", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.25))
+summary(combined_df_3bed$soldprice)
+
+ggplot(combined_df_3bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5, aes(fill=factor(carspace))) +
+  labs(title = "Sold Price vs Distance from Train Station for 3 Bedrooms", x="Distance from Train Station(km)", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.25))
+summary(combined_df_3bed$soldprice)
+```
+
+```{r}
+ggplot(combined_df_4bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 4 Bedrooms", x="Distance from Train Station(km)", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.25))
+summary(combined_df_4bed$soldprice)
+
+ggplot(combined_df_4bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5, aes(fill=factor(carspace))) +
+  labs(title = "Sold Price vs Distance from Train Station for 4 Bedrooms", x="Distance from Train Station(km)", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.25))
+summary(combined_df_4bed$soldprice)
+```
+
+```{r}
+ggplot(combined_df_5bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 5 Bedrooms", x="Distance from Train Station(km)", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.25))
+summary(combined_df_5bed$soldprice)
+
+ggplot(combined_df_5bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5, aes(fill=factor(carspace))) +
+  labs(title = "Sold Price vs Distance from Train Station for 5 Bedrooms", x="Distance from Train Station(km)", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.25))
+summary(combined_df_5bed$soldprice)
+```
+
+### Filtering Data by Carspaces and Bedrooms
+```{r}
+combined_df_1bed_1car <-filter(combined_df, bedroom ==1, carspace == 1)
+
+combined_df_2bed_1car <-filter(combined_df, bedroom ==2, carspace == 1)
+
+combined_df_2bed_2car <-filter(combined_df, bedroom ==2, carspace == 2)
+
+combined_df_3bed_1car <-filter(combined_df, bedroom ==3, carspace == 1)
+
+combined_df_3bed_2car <-filter(combined_df, bedroom ==3, carspace == 2)
+
+combined_df_3bed_3car <-filter(combined_df, bedroom ==3, carspace == 3)
+
+combined_df_3bed_4car <-filter(combined_df, bedroom ==3, carspace == 4)
+
+combined_df_4bed_1car <-filter(combined_df, bedroom ==4, carspace == 1)
+
+combined_df_4bed_2car <-filter(combined_df, bedroom ==4, carspace == 2)
+
+combined_df_4bed_3car <-filter(combined_df, bedroom ==4, carspace == 3)
+
+combined_df_4bed_4car <-filter(combined_df, bedroom ==4, carspace == 4)
+
+combined_df_5bed_1car <-filter(combined_df, bedroom ==5, carspace == 1)
+
+combined_df_5bed_2car <-filter(combined_df, bedroom ==5, carspace == 2)
+
+combined_df_5bed_3car <-filter(combined_df, bedroom ==5, carspace == 3)
+```
+
+
+#### 1 bedroom
+```{r}
+ggplot(combined_df_1bed_1car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 1 Bedroom and 1 Carspace", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_1bed_1car$soldprice)
+```
+
+#### 2 bedrooms 
+```{r}
+ggplot(combined_df_2bed_1car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 2 Bedrooms and 1 Carspace", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_2bed_1car$soldprice)
+
+ggplot(combined_df_2bed_2car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 2 Bedrooms and 2 Carspaces", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_2bed_2car$soldprice)
+```
+
+#### 3 bedrooms
+```{r}
+ggplot(combined_df_3bed_1car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 3 Bedrooms and 1 Carspace", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_3bed_1car$soldprice)
+
+ggplot(combined_df_3bed_2car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 3 Bedrooms and 2 Carspaces", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_3bed_2car$soldprice)
+
+ggplot(combined_df_3bed_3car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 3 Bedrooms and 3 Carspaces", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_3bed_2car$soldprice)
+
+ggplot(combined_df_3bed_4car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 3 Bedrooms and 4 Carspaces", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_3bed_4car$soldprice)
+```
+
+#### 4 bedrooms
+```{r}
+ggplot(combined_df_4bed_1car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 4 Bedrooms and 1 Carspace", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_4bed_1car$soldprice)
+
+ggplot(combined_df_4bed_2car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 4 Bedrooms and 2 Carspaces", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_4bed_2car$soldprice)
+
+ggplot(combined_df_4bed_3car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 4 Bedrooms and 3 Carspaces", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_4bed_3car$soldprice)
+
+ggplot(combined_df_4bed_4car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 4 Bedrooms and 4 Carspaces", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_4bed_4car$soldprice)
+```
+
+#### 5 bedrooms
+```{r}
+ggplot(combined_df_5bed_1car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 5 Bedrooms and 1 Carspace", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_5bed_1car$soldprice)
+
+ggplot(combined_df_5bed_2car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 5 Bedrooms and 2 Carspaces", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_5bed_2car$soldprice)
+
+ggplot(combined_df_5bed_3car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 5 Bedrooms and 3 Carspaces", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_5bed_3car$soldprice)
+```
+
+### Creating a column for Year
+```{r}
+combined_df$Year <- as.factor(format(as.Date(combined_df$yearsold), "%Y"))
+```
+
+```{r}
+# Filtering by year
+combined_df_0.00 <-filter(combined_df, distance_class == "(0,0.25]")
+combined_df_0.25 <-filter(combined_df, distance_class == "(0.25,0.5]")
+combined_df_0.50 <-filter(combined_df, distance_class == "(0.5,0.75]")
+combined_df_0.75 <-filter(combined_df, distance_class == "(0.75,1]")
+combined_df_1.00 <-filter(combined_df, distance_class == "(1,1.25]")
+combined_df_1.25 <-filter(combined_df, distance_class == "(1.25,1.5]")
+combined_df_1.50 <-filter(combined_df, distance_class == "(1.5,1.75]")
+combined_df_1.75 <-filter(combined_df, distance_class == "(1.75,2]")
+combined_df_2.00 <-filter(combined_df, distance_class == "(2,2.25]")
+combined_df_2.25 <-filter(combined_df, distance_class == "(2.25,2.5]")
+combined_df_2.50 <-filter(combined_df, distance_class == "(2.5,2.75]")
+combined_df_2.75 <-filter(combined_df, distance_class == "(2.75,3]")
+combined_df_3.00 <-filter(combined_df, distance_class == "(3,3.25]")
+combined_df_3.25 <-filter(combined_df, distance_class == "(3.25,3.5]")
+combined_df_3.50 <-filter(combined_df, distance_class == "(3.5,3.75]")
+combined_df_3.75 <-filter(combined_df, distance_class == "(3.75,4]")
+```
+
+```{r}
+ggplot(combined_df_0.00, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 0 to 0.25km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_0.00$soldprice)
+
+ggplot(combined_df_0.25, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 0.25 to 0.50km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_0.25$soldprice)
+
+ggplot(combined_df_0.50, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 0.50 to 0.75km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_0.50$soldprice)
+
+ggplot(combined_df_0.75, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 0.75 to 1.00km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_0.75$soldprice)
+
+ggplot(combined_df_1.00, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 1.00 to 1.25km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_1.00$soldprice)
+
+ggplot(combined_df_1.25, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 1.25 to 1.50km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_1.25$soldprice)
+
+ggplot(combined_df_1.50, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 1.50 to 1.75km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_1.50$soldprice)
+
+ggplot(combined_df_1.75, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 1.75 to 2.00km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_1.75$soldprice)
+
+ggplot(combined_df_2.00, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 2.00 to 2.25km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_2.00$soldprice)
+
+ggplot(combined_df_2.25, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 2.25 to 2.50km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_2.25$soldprice)
+
+ggplot(combined_df_2.50, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 2.50 to 2.75km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_2.50$soldprice)
+
+ggplot(combined_df_2.75, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 2.75 to 3.00km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_2.75$soldprice)
+
+ggplot(combined_df_3.00, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 3.00 to 3.25km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_3.00$soldprice)
+
+ggplot(combined_df_3.25, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 3.25 to 3.75km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_3.25$soldprice)
+
+ggplot(combined_df_3.50, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 3.50 to 3.75km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_3.50$soldprice)
+
+ggplot(combined_df_3.75, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 3.75 to 4.00km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_3.75$soldprice)
+```
+
+
+
+
+
+
+
+```{r}
+ggplot(combined_df, aes(x = Year, y = soldprice/100000))+
+    geom_point(aes(color=distance_class)) +
+    labs(title = "Sold Price over Years", x="Year", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+    theme_bw()+
+    theme(axis.text.x = element_text(angle=45,hjust=1))+
+    theme(plot.title = element_text(hjust=0.25))
+
+ggplot(combined_df, aes(x = Year, y = soldprice/100000))+
+    geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+    labs(title = "Sold Price over Years", x="Year", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+    theme_bw()+
+    theme(axis.text.x = element_text(angle=45,hjust=1))+
+    theme(plot.title = element_text(hjust=0.25))
+
+ggplot(combined_df, aes(x = factor(bedroom), y = soldprice/100000))+
+    geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+    labs(title = "Sold Price for Different Numbers of Bedrooms", x="Number of Bedrooms", y="Selling Price (x$100000)")+
+    theme_bw()+
+    theme(axis.text.x = element_text(angle=45,hjust=1))+
+    theme(plot.title = element_text(hjust=0.25))
+
+ggplot(combined_df, aes(x = factor(bathroom), y = soldprice/100000))+
+    geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+    labs(title = "Sold Price for Different Numbers of Bathrooms", x="Number of Bathrooms", y="Selling Price (x$100000)")+
+    theme_bw()+
+    theme(axis.text.x = element_text(angle=45,hjust=1))+
+    theme(plot.title = element_text(hjust=0.25))
+
+ggplot(combined_df, aes(x = factor(carspace), y = soldprice/100000))+
+    geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+    labs(title = "Sold Price for Different Numbers of Carspaces", x="Number of Carspaces", y="Selling Price (x$100000)")+
+    theme_bw()+
+    theme(axis.text.x = element_text(angle=45,hjust=1))+
+    theme(plot.title = element_text(hjust=0.25))
+```
+
+## Two added graphs from Jasmine Mon Apr 17, 2023 7 pm
+```{r}
+q1 <- quantile(combined_df$soldprice, 0.25)
+q3 <- quantile(combined_df$soldprice, 0.75)
+iqr <- q3 - q1
+combine <- subset(combined_df, soldprice >= q1 - 1.5*iqr & soldprice <= q3 + 1.5*iqr)
+
+Q1 <- quantile(combined_df$`distance_to_train_station(km)`, 0.25)
+Q3 <- quantile(combined_df$`distance_to_train_station(km)`, 0.75)
+IQR <- Q3 - Q1
+# What I've changed here at 7:05 AM, Apr 17, 2023, Monday
+# `subset(combined_df ...` <- `subset(combined, ...`
+combined <- subset(combined_df, `distance_to_train_station(km)` >= Q1 - 1.5*IQR & `distance_to_train_station(km)` <= Q3 + 1.5*IQR)
+
+ggplot(combined, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station", x="Distance from Train Station(km)", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.25))
+
+model <- lm(soldprice ~ `distance_to_train_station(km)`, data = combined)
+plot(combined$"distance_to_train_station(km)", resid(model), main = "Residual Plot", xlab = "Distance to train station (km)", ylab = "Residuals", cex=0.15)
+abline(h=0)
+```
