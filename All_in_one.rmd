@@ -207,6 +207,10 @@ export_all_suburbs <- function(file_name) {
   # Filter out rows starting with a '#' character
   suburbs_input <- suburbs_input[!grepl("^#", suburbs_input$location), ]
   
+  # Randomize the order of rows
+  random_order <- sample(nrow(suburbs_input))
+  suburbs_input <- suburbs_input[random_order, ]
+  
   # Loop through each row in the input file and call export_a_suburb function
   for (i in 1:nrow(suburbs_input)) {
     location <- as.character(suburbs_input[i, "location"])
