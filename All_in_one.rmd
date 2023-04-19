@@ -651,12 +651,6 @@ geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
 summary(combined_df_3.75$soldprice)
 ```
 
-
-
-
-
-
-
 ```{r}
 ggplot(combined_df, aes(x = Year, y = soldprice/100000))+
     geom_point(aes(color=distance_class)) +
