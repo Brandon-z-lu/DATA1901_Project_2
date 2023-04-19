@@ -234,7 +234,7 @@ export_all_suburbs <- function(file_name) {
 
 
 # Export all
-```{r, eval=FALSE}
+```{r}
 export_all_suburbs("main1_INPUT.txt")
 ```
 

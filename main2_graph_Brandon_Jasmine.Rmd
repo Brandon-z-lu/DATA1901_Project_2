@@ -1,3 +1,18 @@
+# Setup
+```{r, echo=F, message=F}
+library(tidygeocoder)
+library(tidyverse)
+library(broom)
+library(dplyr)
+library(rafalib)
+library(plotly)
+library(rvest)
+library(lubridate)
+library(geosphere)
+library(parallel)
+```
+
+
 # Reading in files
 ```{r}
 # Get the list of CSV files in the 'csv_cache' directory
