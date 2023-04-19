@@ -1,3 +1,4 @@
+Burwood
 Central
 Cheltenham
 Circular Quay
@@ -12,6 +13,7 @@ Leightonfield
 Leppington
 Lewisham
 Macarthur
+Macquarie Fields
 Martin Place
 Meadowbank
 Milsons Point
@@ -25,7 +27,6 @@ St Leonards
 Summer Hill
 Sydenham
 Town Hall
-Turrella
 Vineyard
 Waterfall
 Windsor

@@ -17,64 +17,64 @@ library(parallel)
 # House scraping: get_df_suburb
 get_df_suburb <- function(location = "2151/Parramatta/"){
   # adapted from https://embracingtherandom.com/r/web-scraping/rent-scraping/
-  # determine how many pages to scroll through 
+  # determine how many pages to scroll through
   tryCatch({
     location <- gsub("\\s+", "+", location)
     # print(location)
-    url <- paste0("https://www.auhouseprices.com/sold/list/NSW/", 
-                  location, 
+    url <- paste0("https://www.auhouseprices.com/sold/list/NSW/",
+                  location,
                   "1/?type=townhouse&ymin=0&ymax=0&bmin=0&bmax=0&pmin=0&pmax=0&sort=date&kw=") # type set to townhouse, no other filtering
     # print(url)
     webpage <- read_html(url)
-    
-    # get the number of properties and the number of property displayed on each page 
-    find_page_number <- webpage  %>%  html_nodes("h2") %>%  html_text() 
+
+    # get the number of properties and the number of property displayed on each page
+    find_page_number <- webpage  %>%  html_nodes("h2") %>%  html_text()
     find_page_number <- find_page_number[1]
     numbers <- as.numeric(regmatches(find_page_number, gregexpr("[0-9]+", find_page_number))[[1]])
     end_page <- ceiling(numbers[3] / numbers[2]) # number of total properties / number on page  = total number of pages
-    
+
     df <- NULL
-    
+
     # print(paste0(location, ": begins 0/4"))
     # print(paste0( "Current suburb: ", location) )
     # print(paste0( "Total pages ", end_page) )
-    
+
     for (this_page in c(1:end_page)){
     # # print(paste0( "Processing page ", this_page) )
     if (this_page %% 5 == 0){
       # print(paste0("Page processed: ", this_page, "/", end_page))
     }
-    
+
     # get website text
-    url <- paste0("https://www.auhouseprices.com/sold/list/NSW/", 
-                  location, 
-                  this_page, 
-                  "/?type=townhouse&ymin=0&ymax=0&bmin=0&bmax=0&pmin=0&pmax=0&sort=date&kw=") # type set to townhouse, no other filtering 
+    url <- paste0("https://www.auhouseprices.com/sold/list/NSW/",
+                  location,
+                  this_page,
+                  "/?type=townhouse&ymin=0&ymax=0&bmin=0&bmax=0&pmin=0&pmax=0&sort=date&kw=") # type set to townhouse, no other filtering
     webpage <- read_html(url)
-    
-    result <- webpage  %>%  html_nodes("li") %>%  html_text() 
-    # end of the relevant content 
+
+    result <- webpage  %>%  html_nodes("li") %>%  html_text()
+    # end of the relevant content
     result <-  result[ 1: grep("current", result) ]
-    # remove the redundant "listed price" 
+    # remove the redundant "listed price"
     result <-  result[ !grepl("List", result) ]
     # remove the price listed with rent
     result <-  result[ !grepl("Rent", result) ]
-    
+
     # filter information on price and number of bedroom/bathroom/carspace
     price_bedroom  <- result[ grep("\\$", result)]
     price_bedroom <- strsplit( price_bedroom , "\\$")
     bedroom <- lapply(price_bedroom, `[`, 1)
     bedroom <- strsplit(unlist( trimws( bedroom) ) , "\\s+")
-    
+
     price <-  lapply(price_bedroom, `[`, 2)
     price <- trimws(price)
     price <- as.numeric(gsub(",","", price ))
-    
+
     # filter information on sold month and year
-    # note sometimes the price is not listed , therefore only get the ones with the price 
+    # note sometimes the price is not listed , therefore only get the ones with the price
     timesold  <- result[ grep("\\$", result)-1]
-    timesold <-  trimws( gsub("Sold on","", timesold )) 
-    
+    timesold <-  trimws( gsub("Sold on","", timesold ))
+
     # whether to use day month year or just month year
     timesold <- lapply(timesold , function(x){
       check_format <- strsplit(x, "\\s")
@@ -88,25 +88,25 @@ get_df_suburb <- function(location = "2151/Parramatta/"){
       x
     })
     timesold <- do.call("c", timesold)
-    
+
     # get address of these properties
-    address <- webpage  %>%  html_nodes("h4") %>%  html_text() 
-    # end of the relevant content 
+    address <- webpage  %>%  html_nodes("h4") %>%  html_text()
+    # end of the relevant content
     address <-  address[ 1: grep("Auction History", address) -1 ]
-    
-    #decide which address contain sold price  
+
+    #decide which address contain sold price
     sold_info <- grep("Sold on", result) #entry with sold info
     price_info <- grep("\\$", result) #entry with price info
-    contain_price <- sold_info  %in% c(price_info-1) #for every sold entry, the immediate next row should be price, if not, then this sold entry does not have price record 
+    contain_price <- sold_info  %in% c(price_info-1) #for every sold entry, the immediate next row should be price, if not, then this sold entry does not have price record
     address <- address[contain_price] #only record those property that has price recorded
-    
-    temp_df <- data.frame( address = address, 
-                           bedroom = as.numeric( unlist( lapply( bedroom, `[`, 1) ) ) , 
-                           bathroom = as.numeric(  unlist( lapply( bedroom, `[`, 2) )) ,  
-                           carspace =  as.numeric( unlist( lapply( bedroom, `[`, 3) )), 
+
+    temp_df <- data.frame( address = address,
+                           bedroom = as.numeric( unlist( lapply( bedroom, `[`, 1) ) ) ,
+                           bathroom = as.numeric(  unlist( lapply( bedroom, `[`, 2) )) ,
+                           carspace =  as.numeric( unlist( lapply( bedroom, `[`, 3) )),
                            soldprice = price ,
                            yearsold =timesold )
-    
+
     df <- rbind(df, temp_df)
   }
   # Borrowed from ChatGPT
@@ -114,7 +114,7 @@ get_df_suburb <- function(location = "2151/Parramatta/"){
   df <- df %>% mutate(House_ID = 1:nrow(.))
   # move the "index" column to the front of the data frame
   df <- df[, c("House_ID", names(df)[-ncol(df)])]
-  
+
   # print(paste0("Page processed: ", this_page, "/", end_page))
   # print(paste0(location, ": 1/4: get_df_suburb: creating data frame done!"))
   return(df)
@@ -123,12 +123,12 @@ get_df_suburb <- function(location = "2151/Parramatta/"){
     # Set the file path and name
     file_path <- "main1_export_Brandon_log/"
     file_name <- "main1_export_Brandon_log.txt"
-    
+
     # Create the directory if it doesn't exist
     if(!dir.exists(file_path)){
       dir.create(file_path)
     }
-    
+
     # Write location to the file
     write(location, file.path(file_path, file_name), append = TRUE)
     return(NULL)
@@ -139,7 +139,7 @@ get_df_suburb <- function(location = "2151/Parramatta/"){
 add_distance_between <- function(lat, lon, fixed_lat, fixed_lon) {
   dist <- distHaversine(c(lon, lat), c(fixed_lon, fixed_lat))
   return(dist)
-}  
+}
 
 
 get_l_suburb_dist <- function(df_suburb, suburb_lat, suburb_lon, location) {
@@ -167,12 +167,12 @@ export_l_suburb_dist_csv <- function(location, l_suburb_dist) {
 
 export_a_suburb <- function(location, suburb_lat, suburb_lon) {
   df_suburb <- get_df_suburb(location)
-  
+
   # Check if df_suburb is NULL (meaning an error occurred in get_df_suburb)
   if (is.null(df_suburb)) {
     return(NULL)
   }
-  
+
   l_suburb_dist <- get_l_suburb_dist(df_suburb, suburb_lat, suburb_lon, location)
   export_l_suburb_dist_csv(location, l_suburb_dist)
   # print(paste0(location, ": Finish csv export"))
@@ -183,7 +183,7 @@ clear_log <- function() {
   # Set the file path and name
   file_path <- "main1_export_Brandon_log"
   file_name <- "main1_export_Brandon_log.txt"
-  
+
   # Check if file exists before removing it
   if (file.exists(file.path(file_path, file_name))) {
     file.remove(file.path(file_path, file_name))
@@ -198,27 +198,27 @@ export_all_suburbs <- function(file_name) {
   a <- clear_log()
   # create directory if it doesn't exist
   if (!dir.exists("~/csv_cache")) {
-  dir.create("csv_cache")  
+  dir.create("csv_cache")
   }
 
   # Read the input file
   suburbs_input <- read.table(file_name, header = FALSE, sep = ",", col.names = c("location", "latitude", "longitude"), strip.white = TRUE, comment.char = "", quote = "")
-  
+
   # Filter out rows starting with a '#' character
   suburbs_input <- suburbs_input[!grepl("^#", suburbs_input$location), ]
-  
+
   # Randomize the order of rows
   random_order <- sample(nrow(suburbs_input))
   suburbs_input <- suburbs_input[random_order, ]
-  
+
   # Loop through each row in the input file and call export_a_suburb function
   for (i in 1:nrow(suburbs_input)) {
     location <- as.character(suburbs_input[i, "location"])
     latitude <- as.numeric(suburbs_input[i, "latitude"])
     longitude <- as.numeric(suburbs_input[i, "longitude"])
-    
+
     export_a_suburb(location, latitude, longitude)
-    
+
     # Print progress bar
     progress <- i / nrow(suburbs_input)
     num_hashes <- floor(progress * 100 / 2) # Assuming each '#' represents 2% of the progress
@@ -226,7 +226,7 @@ export_all_suburbs <- function(file_name) {
     cat("\n")
     cat(sprintf("#%s%s (%.0f%%)\n", paste(rep("#", num_hashes), collapse = ""), paste(rep(" ", num_spaces), collapse = ""), progress * 100))
   }
-  
+
   return(NULL)
 }
 
@@ -234,7 +234,7 @@ export_all_suburbs <- function(file_name) {
 
 
 # Export all
-```{r}
+```{r, eval=FALSE}
 export_all_suburbs("main1_INPUT.txt")
 ```
 
@@ -242,7 +242,7 @@ export_all_suburbs("main1_INPUT.txt")
 # Reading in files
 ```{r}
 # Get the list of CSV files in the 'csv_cache' directory
-csv_files <- list.files(path = "main2_INPUT", pattern = "*.csv", full.names = TRUE)
+csv_files <- list.files(path = "csv_cache", pattern = "*.csv", full.names = TRUE)
 
 # Initialize an empty data frame to store the combined data
 combined_df <- data.frame()
@@ -265,6 +265,7 @@ for (file in csv_files) {
 
 # Inspect the combined data frame
 head(combined_df)
+tail(combined_df)
 ```
 
 ## Filtering Data
@@ -698,11 +699,13 @@ ggplot(combined_df, aes(x = factor(carspace), y = soldprice/100000))+
 q1 <- quantile(combined_df$soldprice, 0.25)
 q3 <- quantile(combined_df$soldprice, 0.75)
 iqr <- q3 - q1
-combine <- subset(combined_df, soldprice >= q1 - 1.5*iqr & soldprice <= q3 + 1.5*iqr)
+combined <- subset(combined_df, soldprice >= q1 - 1.5*iqr & soldprice <= q3 + 1.5*iqr)
 
-Q1 <- quantile(combined_df$`distance_to_train_station(km)`, 0.25)
-Q3 <- quantile(combined_df$`distance_to_train_station(km)`, 0.75)
+# I changed the `na.rm` to be TRUE to remove all invalid N/A data points
+Q1 <- quantile(combined_df$`distance_to_train_station(km)`, 0.25, na.rm = TRUE)
+Q3 <- quantile(combined_df$`distance_to_train_station(km)`, 0.75, na.rm = TRUE)
 IQR <- Q3 - Q1
+
 # What I've changed here at 7:05 AM, Apr 17, 2023, Monday
 # `subset(combined_df ...` <- `subset(combined, ...`
 combined <- subset(combined_df, `distance_to_train_station(km)` >= Q1 - 1.5*IQR & `distance_to_train_station(km)` <= Q3 + 1.5*IQR)
