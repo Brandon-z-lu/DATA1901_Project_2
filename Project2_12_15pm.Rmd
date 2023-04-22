@@ -1,0 +1,810 @@
+---
+title: "How do Townhouses' Distance from the Train Station affect Sale Price"
+author: "Group 5 in Canvas; 530485889 530480725 530475042 530504478 530486174 520649749"
+subtitle: "Project 2"
+date: "University of Sydney | DATA1901 | April 2023"
+output:
+  html_document:
+    fig_caption: yes
+    number_sections: yes
+    self_contained: yes
+    theme: flatly
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    code_folding: hide
+---
+```{r, echo=F, message=F}
+# Loading Packages
+library(tidygeocoder)
+library(tidyverse)
+library(dplyr)
+library(geosphere)
+library(lubridate)
+library(rvest)
+```
+
+<br>
+
+# Executive Summary
+Based on data analysis using 2036 data points from five geographically close suburbs, we can conclude that distance from a train station has a small but relatively insignificant effect on townhouse prices. Therefore, new home buyers can choose more conveniently located homes without worrying about a significant increase in price.
+
+<br>
+
+# Full Report
+
+## Initial Data Analysis (IDA)
+
+
+```{r, echo = T, message = F}
+# Web Scraping Function for 5 Suburbs
+house_scraping<- function( location = "2151/Parramatta/"){
+  # adapted from https://embracingtherandom.com/r/web-scraping/rent-scraping/
+  
+  
+  # determine how many pages to scroll through 
+
+   url <- paste0("https://www.auhouseprices.com/sold/list/NSW/", 
+                location, 
+                "1/?type=townhouse&ymin=0&ymax=0&bmin=0&bmax=0&pmin=0&pmax=0&sort=date&kw=") # type set to townhouse, no other filtering
+  
+  webpage <- read_html(url)
+  
+  # get the number of properties and the number of property displayed on each page 
+  find_page_number <- webpage  %>%  html_nodes("h2") %>%  html_text() 
+  find_page_number <- find_page_number[1]
+  numbers <- as.numeric(regmatches(find_page_number, gregexpr("[0-9]+", find_page_number))[[1]])
+  end_page <- ceiling(numbers[3] / numbers[2]) # number of total properties / number on page  = total number of pages
+  
+  
+  df <- NULL
+  
+  for (thispage in c(1:end_page)){
+    
+    # get website text
+    url <- paste0("https://www.auhouseprices.com/sold/list/NSW/", 
+                  location, 
+                  thispage, 
+                  "/?type=townhouse&ymin=0&ymax=0&bmin=0&bmax=0&pmin=0&pmax=0&sort=date&kw=") # type set to townhouse, no other filtering
+    
+    webpage <- read_html(url)
+    
+    result <- webpage  %>%  html_nodes("li") %>%  html_text() 
+    
+    # end of the relevant content 
+    result <-  result[ 1: grep("current", result) ]
+    # remove the redundant "listed price" 
+    result <-  result[ !grepl("List", result) ]
+    # remove the price listed with rent
+    result <-  result[ !grepl("Rent", result) ]
+    
+    # filter information on price and number of bedroom/bathroom/carspace
+    price_bedroom  <- result[ grep("\\$", result)]
+    price_bedroom <- strsplit( price_bedroom , "\\$")
+    bedroom <- lapply(price_bedroom, `[`, 1)
+    bedroom <- strsplit(unlist( trimws( bedroom) ) , "\\s+")
+    
+    price <-  lapply(price_bedroom, `[`, 2)
+    price <- trimws(price)
+    price <- as.numeric(gsub(",","", price ))
+    
+    
+    # filter information on sold month and year
+    # note sometimes the price is not listed , therefore only get the ones with the price 
+    timesold  <- result[ grep("\\$", result)-1]
+    timesold <-  trimws( gsub("Sold on","", timesold )) 
+    
+    # whether to use day month year or just month year
+    timesold <- lapply(timesold , function(x){
+      check_format <- strsplit(x, "\\s")
+      if (length(check_format[[1]]) == 3){
+        x <- dmy(x)
+      }else if (length(check_format[[1]]) == 2){
+        x <- my(x)
+      }else{
+        x <-  as.Date(paste0(x, "-01-01"))
+      }
+      x
+    })
+    timesold <- do.call("c", timesold)
+    
+    # get address of these properties
+    address <- webpage  %>%  html_nodes("h4") %>%  html_text() 
+    # end of the relevant content 
+    address <-  address[ 1: grep("Auction History", address) -1 ]
+    
+    
+    #decide which address contain sold price  
+    sold_info <- grep("Sold on", result) #entry with sold info
+    price_info <- grep("\\$", result) #entry with price info
+    contain_price <- sold_info  %in% c(price_info-1) #for every sold entry, the immediate next row should be price, if not, then this sold entry does not have price record 
+    address <- address[contain_price] #only record those property that has price recorded
+    
+    temp_df <- data.frame( address = address, 
+                           bedroom = as.numeric( unlist( lapply( bedroom, `[`, 1) ) ) , 
+                           bathroom = as.numeric(  unlist( lapply( bedroom, `[`, 2) )) ,  
+                           carspace =  as.numeric( unlist( lapply( bedroom, `[`, 3) )), 
+                           soldprice = price ,
+                           yearsold =timesold )
+    
+    df <- rbind(df, temp_df)
+  }
+  
+  return(df)
+}
+
+ 
+ 
+# suburb name with space need to be joined with "+" sign 
+df_parramatta <- house_scraping( location = "2150/parramatta/")
+df_merrylands <- house_scraping( location = "2160/merrylands/")
+df_auburn <- house_scraping( location = "2144/auburn/")
+df_eastwood <- house_scraping( location = "2122/eastwood/")
+df_granville <- house_scraping( location = "2142/granville/")
+```
+
+```{r, message = F}
+# Writing longitude and latitude into dataframe using given address
+l_parramatta <- df_parramatta%>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
+
+l_merrylands <- df_merrylands%>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
+
+l_auburn <- df_auburn%>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
+
+l_eastwood <- df_eastwood%>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
+
+l_granville <- df_granville%>% geocode(address, method = 'arcgis', lat=latitude, long=longitude)
+```
+
+```{r, message = F}
+# Calculating Distance to Train Station
+data_distance_between <- function(lat, lon, fixed_lat, fixed_lon) {
+  dist <- distHaversine(c(lon, lat), c(fixed_lon, fixed_lat))/1000
+  return(dist)
+}  # function that returns the distance between two places
+
+# used Google maps for all longitudes and latitudes
+
+parramatta_lat <- -33.8175
+parramatta_lon <- 151.0050
+l_parramatta_distance <- data.frame(l_parramatta, "distance_to_train_station(km)" = apply(l_parramatta[,c("latitude","longitude")], 1, function(x) data_distance_between(x[1], x[2], parramatta_lat, parramatta_lon)))
+
+merrylands_lat <- -33.8363
+merrylands_lon <- 150.9926
+l_merrylands_distance <- data.frame(l_merrylands, "distance_to_train_station(km)" = apply(l_merrylands[,c("latitude","longitude")], 1, function(x) data_distance_between(x[1], x[2], merrylands_lat, merrylands_lon)))
+
+auburn_lat <- -33.8490
+auburn_lon <- 151.0329
+l_auburn_distance <- data.frame(l_auburn, "distance_to_train_station(km)" = apply(l_auburn[,c("latitude","longitude")], 1, function(x) data_distance_between(x[1], x[2], auburn_lat, auburn_lon)))
+
+eastwood_lat <- -33.7899
+eastwood_lon <- 151.0821
+l_eastwood_distance <- data.frame(l_eastwood, "distance_to_train_station(km)" = apply(l_eastwood[,c("latitude","longitude")], 1, function(x) data_distance_between(x[1], x[2], eastwood_lat, eastwood_lon)))
+
+granville_lat <- -33.8326
+granville_lon <- 151.0120
+l_granville_distance <- data.frame(l_granville, "distance_to_train_station(km)" = apply(l_granville[,c("latitude","longitude")], 1, function(x) data_distance_between(x[1], x[2], granville_lat, granville_lon)))
+```
+
+```{r, message = F}
+# Classing Distances by 250m Intervals
+l_parramatta_distance$distance_class <- cut(l_parramatta_distance$"distance_to_train_station.km.",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500,3.000,3.250,3.500,3.750, 4.000))
+l_merrylands_distance$distance_class <- cut(l_merrylands_distance$"distance_to_train_station.km.",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500, 3.000,3.250,3.500,3.750, 4.000))
+l_auburn_distance$distance_class <- cut(l_auburn_distance$"distance_to_train_station.km.",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500,3.000,3.250,3.500,3.750, 4.000))
+l_eastwood_distance$distance_class <- cut(l_eastwood_distance$"distance_to_train_station.km.",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500,3.000,3.250,3.500,3.750, 4.000))
+l_granville_distance$distance_class <- cut(l_granville_distance$"distance_to_train_station.km.",breaks=c(0,0.250,0.500,0.750,1.000,1.250,1.500,1.750,2.000,2.250,2.500,3.000,3.250,3.500,3.750, 4.000))
+```
+
+```{r, message = F}
+# Combines data sets of all 5 suburbs into one large dataframe
+combined_df <-rbind(l_parramatta_distance, l_merrylands_distance, l_auburn_distance, l_eastwood_distance, l_granville_distance)
+```
+
+```{r}
+# Creating a column for Year
+combined_df$Year <- as.factor(format(as.Date(combined_df$yearsold), "%Y"))
+```
+
+
+Data used for the report was scraped from the internet using the following link: <https://www.auhouseprices.com/sold/list/NSW/>. 
+
+A total of 2036 data points from five suburbs were used. The number of points collected from each suburb is shown below:
+
+- Auburn: 675
+
+- Eastwood: 191
+
+- Granville: 308
+
+- Merrylands: 468
+
+- Parramatta: 394
+
+
+We used these variables and cleaned the data in the following ways:
+
+- Distance from train station (km) [QUANTITATIVE]
+  - Address was operationalised into longitude and latitude. These coordinates were used to calculate straight line distance to train station and classed into 250m intervals.
+- Selling price [QUANTITATIVE]
+
+<br>
+
+### *Limitations* {-}
+
+A function was created to calculate straight line distance from townhouses to train stations, which inaccurately represents travel distance between the two. Some townhouses are likely closer to stations from neighbouring suburbs instead. The relevance of trains as a mode of transport may differ between different suburbs. Additionally, train stations often coincide with commercial centres which may affect selling price.
+
+<br>
+
+### *Assumptions* {-}
+
+A significant assumption was that no amenities close to train stations would increase the price of townhouses (e.g. shops, schools), which may be confounding variables. Another assumption was that all stations, regardless of how major, had an equal effect on selling prices. 
+
+## Research Theme 
+Distances from stations were classed into 250 metre intervals to increase the readability of graphical summaries, as the data points produced cluttered scatterplots. A side-by-side boxplot was used to compare whether distance correlated to a change in price. The boxplot suggests there is no correlation between proximity to train stations and selling price. The residual plot illustrates clustering of data points on the bottom-left. Without random scatter, the data is not homoscedastic, hence a linear model is not appropriate and a more complex relationship may exist.
+
+```{r}
+ggplot(combined_df, aes(x=distance_class, y=soldprice/10000))+
+  geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.50))
+
+model <- lm(soldprice ~ distance_to_train_station.km., data = combined_df)
+
+plot(combined_df$distance_to_train_station.km., resid(model), main = "Residual Plot for Sold Price against Distance to Train Station", xlab = "Distance to train station (km)", ylab = "Residuals", cex=0.15)
+abline(h=0)
+```
+
+The numerical summary suggested no correlation. 
+
+*For 0-250m from train station:*
+```{r}
+combined_df_0.00 <-filter(combined_df, distance_class == "(0,0.25]")
+summary(combined_df_0.00$soldprice)
+```
+
+*For 0.75km-1km:*
+```{r}
+combined_df_0.75 <-filter(combined_df, distance_class == "(0.75,1]")
+summary(combined_df_0.75$soldprice)
+```
+
+*For 3.75-4km:*
+```{r}
+combined_df_3.75 <-filter(combined_df, distance_class == "(3.75,4]")
+summary(combined_df_3.75$soldprice)
+```
+
+The median selling price for houses between 0 and 250 metres was $412500, it increased to $546500 between 0.75 and 1 kilometre, then decreased to $360000 between 3.75 and 4 kilometres. The fluctuation in median selling price over distance discounts the possibility of a linear correlation. Properties in Sydney within 400 metres of train stations have higher price growth (4.5%) compared to properties between 800 and 1600 metres (0.3%) (Forbes, 2021). Other research suggests the train stations have an insignificant correlation with property prices (r=0.091) (p=0.380) (Berawi et al., 2020). Research suggests that number of rooms and building size was the most significant contributor to property pricing close to stations (Berawi et al., 2020). 
+
+The number of confounding variables alongside a more complex trend could account for the lack of correlation observed. Prices seemed to increase with the number of bedrooms, car-spaces and bathrooms. Yet after controlling for them, there was still no correlation. This suggests there are further confounding variables unaccounted for. To account for inflation, a side-by-side boxplot of selling price between 2000 and 2023 in Western Sydney suburbs was plotted. A general increase in townhouse price over the years was observed. Inflation must also be a significant confounding variable that had a substantial effect on selling price. The complex interaction of variables which affect property price could explain the absence of a correlation. 
+```{r}
+ggplot(combined_df, aes(x = Year, y = soldprice/100000))+
+    geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+    labs(title = "Sold Price over Years", x="Year", y="Selling Price (x$100000)")+
+    theme_bw()+
+    theme(axis.text.x = element_text(angle=45,hjust=1))+
+    theme(plot.title = element_text(hjust=0.50))
+
+ggplot(combined_df, aes(x = factor(bedroom), y = soldprice/100000))+
+    geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+    labs(title = "Sold Price for Different Numbers of Bedrooms", x="Number of Bedrooms", y="Selling Price (x$100000)")+
+    theme_bw()+
+    theme(axis.text.x = element_text(angle=45,hjust=1))+
+    theme(plot.title = element_text(hjust=0.50))
+
+combined_df_bathroom <- filter(combined_df,!is.na(bathroom))
+ggplot(combined_df_bathroom, aes(x = factor(bathroom), y = soldprice/100000))+
+    geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+    labs(title = "Sold Price for Different Numbers of Bathrooms", x="Number of Bathrooms", y="Selling Price (x$100000)")+
+    theme_bw()+
+    theme(axis.text.x = element_text(angle=45,hjust=1))+
+    theme(plot.title = element_text(hjust=0.50))
+
+combined_df_carspace<- filter(combined_df,!is.na(carspace))
+ggplot(combined_df_carspace, aes(x = factor(carspace), y = soldprice/100000))+
+    geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+    labs(title = "Sold Price for Different Numbers of Carspaces", x="Number of Carspaces", y="Selling Price (x$100000)")+
+    theme_bw()+
+    theme(axis.text.x = element_text(angle=45,hjust=1))+
+    theme(plot.title = element_text(hjust=0.50))
+```
+
+<br>
+
+## Related Articles
+Proximity to schools and hospitals had a significant effect on house pricing (Berawi et al., 2020). Positive effects of stations on property pricing include retail activity, reduced travel cost or convenience whilst increased crime or noise have negative effects (Bowes & Ihlanfeldt, 2001). These confounding variables could explain the null result and must be controlled in further investigation.
+
+<br>
+
+## References
+Berawi, M. A., Miraj, P., Saroji, G., & Sari, M. (2020). Impact of rail transit station proximity to commercial property prices: Utilizing big data in Urban Real Estate. Journal of Big Data, 7(1), 1–17. https://doi.org/10.1186/s40537-020-00348-z 
+
+Bowes, D. R., & Ihlanfeldt, K. R. (2001). Identifying the impacts of rail transit stations on residential property values. Journal of Urban Economics, 50(1), 1–25. https://doi.org/10.1006/juec.2001.2214 
+
+Forbes, K. (2021, August 12). Does a train station increase the value of a property? Metropole Property Strategists. Retrieved April 10, 2023, from https://metropole.com.au/how-have-train-stations-affected-property-prices-in-sydney/#:~:text=It%20found%20that%20properties%20within,a%20growth%20rate%20of%200.3%25. 
+
+<br>
+
+## Acknowledgments
+
+All members of our team met on 11/3, 18/3, 25/3 and 1/4 from approximately 1:30-3:30pm. On 8/4/23, Brandon and Jasmine met separately to discuss coding ideas from 7:30-9:30pm. On the 15/4/23, all team members met together once more for a 2 hour meeting from 9-11pm to finalise the presentation methods, conclusions and graphical outputs to complete the project. 
+
+Overall, our group was split into a coding team consisting of Jasmine Gu, Brandon Lu and Byungjun Kim, and a writing team consisting of Gihansa Kottasha Vidhanelage, Yvonnne Zhao and Sakurako Suzuki. Jasmine Gu led coding and incorporated  suggestions from all team members into the research ideas and graphical/numerical outputs. Byungjun and Brandon supported this with their own coding ideas. Brandon further introduced encapsulation including error handling and taking input as large as 136 suburbs, used Google Map API to scrape train station coordinates, and created easy-to-use interfaces to monitor the rmd file knitting progress. He is also responsible for taking meeting minutes and writing a daily to-do list. Yvonne and Gihansa focused on report writing while taking suggestions and edits from other team members. Sakurako  focused on the video script and created a slideshow for the presentation. Byungjun did the final video editing by compiling all clips. Jasmine put the final html file together by formatting everything and confirmed all sections were complete and met requirements. 
+
+<br>
+
+## Appendix
+To get an idea of what the data frame looked like:
+```{r}
+head(combined_df)
+```
+- Instead of a scatter plot which plots sale price against the quantitative "distance;_to_train_station.km." variable, distances were classed into 250m intervals, as the large number of datapoints made it impossible to observe anything substantial in the scatterplot other than what looked like a mass of different colours. 
+
+### Data Dictionary {-}
+
+| Field Name                        | Data Type   | Description                                                                                     |
+|----------------------------------|-------------|-------------------------------------------------------------------------------------------------|
+| address (qualitative)            | String      | The address of the property                                                                     |
+| bedroom (quantitative)           | Integer     | The number of bedrooms in this property                                                         |
+| bathroom (quantitative)          | Integer     | The number of bathrooms in this property                                                        |
+| carspace (quantitative)          | Integer     | The number of carspaces in this property                                                        |
+| soldprice (quantitative)         | Integer     | The final selling price of the property                                                         |
+| yearsold (date)                  | Date        | The date on which the property was sold                                                         |
+| latitude (quantitative)          | Float       | The latitude of the property                                                                    |
+| longitude (quantitative)         | Float       | The longitude of the property                                                                   |
+| distance_to_train_station (km)   | Float       | The distance between the property and the train station of that suburb in kilometres            |
+| distance_class (qualitative)     | String      | The 250m interval class in which the distance between the property and train station lies in    |
+| Year (qualitative)               | Integer     | The year in which the property was sold                                                         |
+
+
+### Coloured Versions of Graphs for Better Visualisation with Some Clients {-}
+For clients who may visualise more easily with colours (each colour corresponds to the respective horizontal axis label below it) :
+<br>
+
+*Overall Graph:* 
+```{r}
+ggplot(combined_df, aes(x=distance_class, y=soldprice/10000, fill = distance_class))+
+  geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.50))+
+  theme(legend.position = "none")
+```
+
+
+*Confounding Variable Graphs* 
+```{r}
+ggplot(combined_df, aes(x = Year, y = soldprice/100000, fill = Year))+
+    geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+    labs(title = "Sold Price over Years", x="Year", y="Selling Price (x$100000)")+
+    theme_bw()+
+    theme(axis.text.x = element_text(angle=45,hjust=1))+
+    theme(plot.title = element_text(hjust=0.50))+
+  theme(legend.position = "none")
+
+ggplot(combined_df, aes(x = factor(bedroom), y = soldprice/100000, fill = factor(bedroom)))+
+    geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+    labs(title = "Sold Price for Different Numbers of Bedrooms", x="Number of Bedrooms", y="Selling Price (x$100000)")+
+    theme_bw()+
+    theme(axis.text.x = element_text(angle=45,hjust=1))+
+    theme(plot.title = element_text(hjust=0.50))+
+  scale_fill_brewer(palette="RdPu")+
+  theme(legend.position = "none")
+
+combined_df_bathroom <- filter(combined_df,!is.na(bathroom))
+ggplot(combined_df_bathroom, aes(x = factor(bathroom), y = soldprice/100000, fill = factor(bathroom)))+
+    geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+    labs(title = "Sold Price for Different Numbers of Bathrooms", x="Number of Bathrooms", y="Selling Price (x$100000)")+
+    theme_bw()+
+    theme(axis.text.x = element_text(angle=45,hjust=1))+
+    theme(plot.title = element_text(hjust=0.50))+
+  scale_fill_brewer(palette="PuBu")+
+  theme(legend.position = "none")
+
+combined_df_carspace<- filter(combined_df,!is.na(carspace))
+ggplot(combined_df_carspace, aes(x = factor(carspace), y = soldprice/100000, fill = factor(carspace)))+
+    geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+    labs(title = "Sold Price for Different Numbers of Carspaces", x="Number of Carspaces", y="Selling Price (x$100000)")+
+    theme_bw()+
+    theme(axis.text.x = element_text(angle=45,hjust=1))+
+    theme(plot.title = element_text(hjust=0.50))+
+  scale_fill_brewer(palette="Greens")+
+  theme(legend.position = "none")
+```
+
+### Filtering the Data by Number of Bedrooms {-}
+(Colours determined by number of carspaces)
+- Clients may use this section to take a closer look at townhouse sale price data that is specific to the number of bedrooms they are interested in. 
+
+```{r}
+combined_df_1bed <-filter(combined_df, bedroom ==1)
+combined_df_2bed <-filter(combined_df, bedroom ==2)
+combined_df_3bed <-filter(combined_df, bedroom ==3)
+combined_df_4bed <-filter(combined_df, bedroom ==4)
+combined_df_5bed <-filter(combined_df, bedroom ==5)
+```
+
+#### 1 Bedroom {-}
+```{r}
+ggplot(combined_df_1bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.0) +
+  labs(title = "Sold Price vs Distance from Train Station for 1 Bedroom", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.50))
+
+ggplot(combined_df_1bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.0, aes(fill=factor(carspace))) +
+  labs(title = "Sold Price vs Distance from Train Station for 1 Bedroom", x="Distance from Train Station(km)", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.50))+
+  scale_fill_brewer(palette="Pastel1")
+summary(combined_df_1bed$soldprice)
+```
+
+#### 2 Bedrooms {-}
+```{r}
+ggplot(combined_df_2bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.0) +
+  labs(title = "Sold Price vs Distance from Train Station for 2 Bedrooms", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.25))+
+  scale_fill_brewer(palette="Set3")
+
+ggplot(combined_df_2bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.0, aes(fill=factor(carspace))) +
+  labs(title = "Sold Price vs Distance from Train Station for 2 Bedrooms", x="Distance from Train Station(km)", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.25))+
+  scale_fill_brewer(palette="Pastel1")
+summary(combined_df_2bed$soldprice)
+```
+
+#### 3 Bedrooms {-}
+```{r}
+ggplot(combined_df_3bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.0) +
+  labs(title = "Sold Price vs Distance from Train Station for 3 Bedrooms", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.25))
+
+ggplot(combined_df_3bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.0, aes(fill=factor(carspace))) +
+  labs(title = "Sold Price vs Distance from Train Station for 3 Bedrooms", x="Distance from Train Station(km)", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.25))+
+  scale_fill_brewer(palette="Pastel1")
+summary(combined_df_3bed$soldprice)
+```
+
+#### 4 Bedrooms {-}
+```{r}
+ggplot(combined_df_4bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.0) +
+  labs(title = "Sold Price vs Distance from Train Station for 4 Bedrooms", x="Distance from Train Station(km)", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.25))
+
+ggplot(combined_df_4bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.0, aes(fill=factor(carspace))) +
+  labs(title = "Sold Price vs Distance from Train Station for 4 Bedrooms", x="Distance from Train Station(km)", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.25))+
+  scale_fill_brewer(palette="Pastel1")
+summary(combined_df_4bed$soldprice)
+```
+
+#### 5 Bedrooms {-}
+```{r}
+ggplot(combined_df_5bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.0) +
+  labs(title = "Sold Price vs Distance from Train Station for 5 Bedrooms", x="Distance from Train Station(km)", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.25))
+
+ggplot(combined_df_5bed, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.0, aes(fill=factor(carspace))) +
+  labs(title = "Sold Price vs Distance from Train Station for 5 Bedrooms", x="Distance from Train Station(km)", y="Selling Price (x$100000)", fill = "Number of Carspaces")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))+
+  theme(plot.title = element_text(hjust=0.25))+
+  scale_fill_brewer(palette="Pastel1")
+summary(combined_df_5bed$soldprice)
+```
+
+### Filtering Data by Number of Carspaces and Bedrooms {-}
+- Clients may use this section to take a closer look at townhouse selling price over different distances from the train station with the specific number of bedrooms and carspaces of interest. 
+
+```{r, message = F}
+combined_df_1bed_1car <-filter(combined_df, bedroom ==1, carspace == 1)
+
+combined_df_2bed_1car <-filter(combined_df, bedroom ==2, carspace == 1)
+
+combined_df_2bed_2car <-filter(combined_df, bedroom ==2, carspace == 2)
+
+combined_df_3bed_1car <-filter(combined_df, bedroom ==3, carspace == 1)
+
+combined_df_3bed_2car <-filter(combined_df, bedroom ==3, carspace == 2)
+
+combined_df_3bed_3car <-filter(combined_df, bedroom ==3, carspace == 3)
+
+combined_df_3bed_4car <-filter(combined_df, bedroom ==3, carspace == 4)
+
+combined_df_4bed_1car <-filter(combined_df, bedroom ==4, carspace == 1)
+
+combined_df_4bed_2car <-filter(combined_df, bedroom ==4, carspace == 2)
+
+combined_df_4bed_3car <-filter(combined_df, bedroom ==4, carspace == 3)
+
+combined_df_4bed_4car <-filter(combined_df, bedroom ==4, carspace == 4)
+
+combined_df_5bed_1car <-filter(combined_df, bedroom ==5, carspace == 1)
+
+combined_df_5bed_2car <-filter(combined_df, bedroom ==5, carspace == 2)
+
+combined_df_5bed_3car <-filter(combined_df, bedroom ==5, carspace == 3)
+```
+
+#### *1 Bedroom* {-}
+```{r}
+ggplot(combined_df_1bed_1car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 1 Bedroom and 1 Carspace", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_1bed_1car$soldprice)
+```
+
+#### 2 bedrooms {-}
+```{r}
+ggplot(combined_df_2bed_1car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 2 Bedrooms and 1 Carspace", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_2bed_1car$soldprice)
+
+ggplot(combined_df_2bed_2car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 2 Bedrooms and 2 Carspaces", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_2bed_2car$soldprice)
+```
+
+#### 3 bedrooms {-}
+```{r}
+ggplot(combined_df_3bed_1car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 3 Bedrooms and 1 Carspace", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_3bed_1car$soldprice)
+
+ggplot(combined_df_3bed_2car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 3 Bedrooms and 2 Carspaces", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_3bed_2car$soldprice)
+
+ggplot(combined_df_3bed_3car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 3 Bedrooms and 3 Carspaces", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_3bed_3car$soldprice)
+
+ggplot(combined_df_3bed_4car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 3 Bedrooms and 4 Carspaces", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_3bed_4car$soldprice)
+```
+
+#### 4 bedrooms {-}
+```{r}
+ggplot(combined_df_4bed_1car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 4 Bedrooms and 1 Carspace", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_4bed_1car$soldprice)
+
+ggplot(combined_df_4bed_2car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 4 Bedrooms and 2 Carspaces", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_4bed_2car$soldprice)
+
+ggplot(combined_df_4bed_3car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 4 Bedrooms and 3 Carspaces", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_4bed_3car$soldprice)
+
+ggplot(combined_df_4bed_4car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 4 Bedrooms and 4 Carspaces", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_4bed_4car$soldprice)
+```
+
+#### 5 bedrooms {-}
+```{r}
+ggplot(combined_df_5bed_1car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 5 Bedrooms and 1 Carspace", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_5bed_1car$soldprice)
+
+ggplot(combined_df_5bed_2car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 5 Bedrooms and 2 Carspaces", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_5bed_2car$soldprice)
+
+ggplot(combined_df_5bed_3car, aes(x = distance_class, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs Distance from Train Station for 5 Bedrooms and 3 Carspaces", x="Distance from Train Station(km)", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_5bed_3car$soldprice)
+```
+
+### Graphs of Sale Price for Each Class of Distance over the Years {-}
+- This allows clients to observe how much sale prices have changed over the years for townhouses of specific distance ranges from the train station. It can provide an idea of how significantly time may have confounded results for townhouses of that specific distance range from train stations.
+
+```{r}
+# Filtering by year
+combined_df_0.00 <-filter(combined_df, distance_class == "(0,0.25]")
+combined_df_0.25 <-filter(combined_df, distance_class == "(0.25,0.5]")
+combined_df_0.50 <-filter(combined_df, distance_class == "(0.5,0.75]")
+combined_df_0.75 <-filter(combined_df, distance_class == "(0.75,1]")
+combined_df_1.00 <-filter(combined_df, distance_class == "(1,1.25]")
+combined_df_1.25 <-filter(combined_df, distance_class == "(1.25,1.5]")
+combined_df_1.50 <-filter(combined_df, distance_class == "(1.5,1.75]")
+combined_df_1.75 <-filter(combined_df, distance_class == "(1.75,2]")
+combined_df_2.00 <-filter(combined_df, distance_class == "(2,2.25]")
+combined_df_2.25 <-filter(combined_df, distance_class == "(2.25,2.5]")
+combined_df_2.50 <-filter(combined_df, distance_class == "(2.5,2.75]")
+combined_df_2.75 <-filter(combined_df, distance_class == "(2.75,3]")
+combined_df_3.00 <-filter(combined_df, distance_class == "(3,3.25]")
+combined_df_3.25 <-filter(combined_df, distance_class == "(3.25,3.5]")
+combined_df_3.50 <-filter(combined_df, distance_class == "(3.5,3.75]")
+combined_df_3.75 <-filter(combined_df, distance_class == "(3.75,4]")
+```
+
+```{r}
+ggplot(combined_df_0.00, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 0 to 0.25km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_0.00$soldprice)
+
+ggplot(combined_df_0.25, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 0.25 to 0.50km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_0.25$soldprice)
+
+ggplot(combined_df_0.50, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 0.50 to 0.75km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_0.50$soldprice)
+
+ggplot(combined_df_0.75, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 0.75 to 1.00km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_0.75$soldprice)
+
+ggplot(combined_df_1.00, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 1.00 to 1.25km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_1.00$soldprice)
+
+ggplot(combined_df_1.25, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 1.25 to 1.50km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_1.25$soldprice)
+
+ggplot(combined_df_1.50, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 1.50 to 1.75km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_1.50$soldprice)
+
+ggplot(combined_df_1.75, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 1.75 to 2.00km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_1.75$soldprice)
+
+ggplot(combined_df_2.00, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 2.00 to 2.25km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_2.00$soldprice)
+
+ggplot(combined_df_2.25, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 2.25 to 2.50km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_2.25$soldprice)
+
+ggplot(combined_df_2.50, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 2.50 to 2.75km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_2.50$soldprice)
+
+ggplot(combined_df_2.75, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 2.75 to 3.00km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_2.75$soldprice)
+
+ggplot(combined_df_3.00, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 3.00 to 3.25km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_3.00$soldprice)
+
+ggplot(combined_df_3.25, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 3.25 to 3.75km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_3.25$soldprice)
+
+ggplot(combined_df_3.50, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 3.50 to 3.75km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_3.50$soldprice)
+
+ggplot(combined_df_3.75, aes(x = Year, y = soldprice/100000))+
+geom_boxplot(outlier.colour = "blue", outlier.size=1.5) +
+  labs(title = "Sold Price vs year for townhouses 3.75 to 4.00km from train station", x="Year", y="Selling Price (x$100000)")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=45,hjust=1))
+summary(combined_df_3.75$soldprice)
+```
+
+
+
